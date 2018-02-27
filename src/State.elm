@@ -5,14 +5,14 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    {} ! []
+    { view = Home, previousWorkouts = [ Workout Push, Workout Pull ] } ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        House ->
-            model ! []
+        SetView view ->
+            { model | view = view } ! []
 
 
 subscriptions : Model -> Sub Msg
