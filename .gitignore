@@ -2,3 +2,11 @@
 elm-stuff
 # elm-repl generated files
 repl-temp-*
+
+# JS files
+node_modules
+public/main.js
+package-lock.json
+
+# Design Files
+*.sketch
