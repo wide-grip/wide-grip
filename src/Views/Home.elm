@@ -18,6 +18,6 @@ view model =
             , class "bg-center contain mw6 center"
             ]
             []
-        , p [ onClick <| SetView Home ] [ text "Track Session" ]
-        , p [ onClick <| SetView PreviousWorkouts ] [ text "Your Gainz" ]
+        , p [ onClick <| SetView SelectSession ] [ text "Track Workout" ]
+        , p [ onClick <| SetView History ] [ text "Your Gainz" ]
         ]

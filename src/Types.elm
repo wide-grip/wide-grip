@@ -1,24 +1,25 @@
 module Types exposing (..)
 
-import Date exposing (Date)
-
 
 type alias Model =
     { view : View
-    , previousWorkouts : List Workout
+    , currentWorkout : Maybe Workout
     }
 
 
 type Msg
     = SetView View
+    | StartWorkout Session
 
 
 type View
     = Home
-    | PreviousWorkouts
+    | History
+    | SelectSession
+    | SelectExercises
 
 
-type WorkoutType
+type Session
     = Push
     | Pull
     | Legs
@@ -26,5 +27,6 @@ type WorkoutType
 
 
 type alias Workout =
-    { workoutType : WorkoutType
+    { session : Session
+    , exercises : List String
     }
