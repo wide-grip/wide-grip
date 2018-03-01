@@ -1,4 +1,4 @@
-module Views.SelectExercises exposing (..)
+module Views.StartAnExercise exposing (..)
 
 import Html exposing (..)
 import Types exposing (..)
@@ -6,4 +6,4 @@ import Types exposing (..)
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    div [] [ text "big back" ]

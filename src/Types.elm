@@ -10,13 +10,15 @@ type alias Model =
 type Msg
     = SetView View
     | StartWorkout Session
+    | ConfirmExercises
 
 
 type View
     = Home
     | History
     | SelectSession
-    | SelectExercises
+    | SelectExercisesForWorkout
+    | StartAnExercise
 
 
 type Session

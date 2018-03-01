@@ -11,3 +11,24 @@ sessionTypeToString session =
 
         sessionType ->
             toString sessionType
+
+
+defaultExercises : Session -> List String
+defaultExercises session =
+    case session of
+        Push ->
+            [ "Bench press", "Incline bench press", "Rope pull down" ]
+
+        Pull ->
+            [ "Pull ups", "Seated rows", "Bicep curls" ]
+
+        Legs ->
+            [ "Squats", "Lunges", "Calf raises" ]
+
+        UserDefined string ->
+            []
+
+
+currentSessionType : Maybe Workout -> Maybe Session
+currentSessionType =
+    Maybe.map .session

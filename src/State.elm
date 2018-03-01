@@ -1,5 +1,6 @@
 module State exposing (..)
 
+import Data.Workout exposing (defaultExercises)
 import Types exposing (..)
 
 
@@ -30,10 +31,21 @@ update msg model =
 
         StartWorkout session ->
             { model
-                | currentWorkout = Just <| Workout session []
-                , view = SelectExercises
+                | currentWorkout = initWorkoutWithSession session
+                , view = SelectExercisesForWorkout
             }
                 ! []
+
+        ConfirmExercises ->
+            { model | view = StartAnExercise } ! []
+
+
+initWorkoutWithSession : Session -> Maybe Workout
+initWorkoutWithSession session =
+    Just
+        { session = session
+        , exercises = defaultExercises session
+        }
 
 
 
