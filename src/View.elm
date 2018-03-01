@@ -2,10 +2,10 @@ module View exposing (..)
 
 import Html exposing (..)
 import Types exposing (..)
-import Views.Home as Home
 import Views.History as History
-import Views.SelectSession as SelectSession
+import Views.Home as Home
 import Views.SelectExercisesForWorkout as SelectExercisesForWorkout
+import Views.SelectSession as SelectSession
 import Views.StartAnExercise as StartAnExercise
 
 
