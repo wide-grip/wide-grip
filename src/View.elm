@@ -1,10 +1,16 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Types exposing (..)
+import Views.Home as Home
+import Views.PreviousWorkouts as PreviousWorkouts
 
 
 view : Model -> Html Msg
 view model =
-    div [ class "tc mt5 tracked-mega ttu" ] [ p [] [ text "Gainz" ] ]
+    case model.view of
+        Home ->
+            Home.view model
+
+        PreviousWorkouts ->
+            PreviousWorkouts.view model
