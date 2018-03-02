@@ -1,6 +1,7 @@
 module State exposing (..)
 
 import Data.Workout exposing (currentExercises, defaultExercises)
+import Dict
 import Types exposing (..)
 
 
@@ -47,10 +48,29 @@ update msg model =
                 ! []
 
         InputWeight string ->
-            model ! []
+            { model
+                | currentWorkout = updateCurrentSet string model.currentWorkout
+            }
+                ! []
 
         InputReps string ->
             model ! []
+
+
+updateCurrentSet : String -> Maybe Workout -> Maybe Workout
+updateCurrentSet string workoutMaybe =
+    workoutMaybe
+        |> Maybe.map (\workout -> { workout | exercises = Dict.empty })
+
+
+updateWeight : String -> CurrentSet -> CurrentSet
+updateWeight weightStr ( _, b ) =
+    ( String.toInt weightStr, b )
+
+
+updateReps : String -> CurrentSet -> CurrentSet
+updateReps repStr ( a, _ ) =
+    ( a, String.toInt repStr )
 
 
 updateCurrentExercise : Int -> Maybe Workout -> Maybe Workout

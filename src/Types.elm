@@ -1,5 +1,7 @@
 module Types exposing (..)
 
+import Dict exposing (Dict)
+
 
 type alias Model =
     { view : View
@@ -34,15 +36,18 @@ type WorkoutName
 
 type alias Workout =
     { workoutName : WorkoutName
-    , exercises : List Exercise
+    , exercises : Dict Int Exercise
     , currentExercise : Maybe Int
     }
 
 
 type alias Exercise =
-    { id : Int
-    , name : String
+    { name : String
     , sets : List ( Int, Int )
     , complete : Bool
-    , currentSet : ( Result String Int, Result String Int )
+    , currentSet : CurrentSet
     }
+
+
+type alias CurrentSet =
+    ( Result String Int, Result String Int )

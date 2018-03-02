@@ -1,6 +1,7 @@
 module Views.StartAnExercise exposing (..)
 
 import Data.Workout exposing (currentExercises)
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -18,7 +19,8 @@ view model =
 
 createExerciseList : Maybe Workout -> List (Html Msg)
 createExerciseList currentWorkout =
-    List.map
-        (\exercise -> p [ onClick <| StartExercise exercise.id, class "pointer" ] [ text exercise.name ])
-    <|
-        currentExercises currentWorkout
+    Dict.values <|
+        Dict.map
+            (\id exercise -> p [ onClick <| StartExercise id, class "pointer" ] [ text exercise.name ])
+        <|
+            currentExercises currentWorkout

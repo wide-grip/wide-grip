@@ -1,5 +1,6 @@
 module Data.Workout exposing (..)
 
+import Dict exposing (Dict)
 import Types exposing (..)
 
 
@@ -13,29 +14,32 @@ workoutNameToString workoutName =
             toString workoutName
 
 
-defaultExercises : WorkoutName -> List Exercise
+defaultExercises : WorkoutName -> Dict Int Exercise
 defaultExercises session =
     case session of
         Push ->
-            [ Exercise 1 "Bench press" [] False emptySet
-            , Exercise 2 "Incline bench press" [] False emptySet
-            , Exercise 3 "Rope pull down" [] False emptySet
-            ]
+            Dict.fromList
+                [ ( 1, Exercise "Bench press" [] False emptySet )
+                , ( 2, Exercise "Incline bench press" [] False emptySet )
+                , ( 3, Exercise "Rope pull down" [] False emptySet )
+                ]
 
         Pull ->
-            [ Exercise 4 "Pull ups" [] False emptySet
-            , Exercise 5 "Seated rows" [] False emptySet
-            , Exercise 6 "Bicep curls" [] False emptySet
-            ]
+            Dict.fromList
+                [ ( 4, Exercise "Pull ups" [] False emptySet )
+                , ( 5, Exercise "Seated rows" [] False emptySet )
+                , ( 6, Exercise "Bicep curls" [] False emptySet )
+                ]
 
         Legs ->
-            [ Exercise 7 "Squats" [] False emptySet
-            , Exercise 8 "Lunges" [] False emptySet
-            , Exercise 9 "Calf raises" [] False emptySet
-            ]
+            Dict.fromList
+                [ ( 7, Exercise "Squats" [] False emptySet )
+                , ( 8, Exercise "Lunges" [] False emptySet )
+                , ( 9, Exercise "Calf raises" [] False emptySet )
+                ]
 
         UserDefined string ->
-            []
+            Dict.empty
 
 
 emptySet : ( Result String Int, Result String Int )
@@ -43,9 +47,9 @@ emptySet =
     ( Err "", Err "" )
 
 
-currentExercises : Maybe Workout -> List Exercise
+currentExercises : Maybe Workout -> Dict Int Exercise
 currentExercises =
-    Maybe.map .exercises >> Maybe.withDefault []
+    Maybe.map .exercises >> Maybe.withDefault Dict.empty
 
 
 currentSessionType : Maybe Workout -> Maybe WorkoutName
