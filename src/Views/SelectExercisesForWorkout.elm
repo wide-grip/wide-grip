@@ -17,6 +17,6 @@ view model =
         ]
 
 
-renderExercise : String -> Html Msg
+renderExercise : Exercise -> Html Msg
 renderExercise exercise =
-    p [] [ text exercise ]
+    p [] [ text exercise.name ]

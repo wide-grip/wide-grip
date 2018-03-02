@@ -13,32 +13,37 @@ workoutNameToString workoutName =
             toString workoutName
 
 
-defaultExercises : WorkoutName -> List String
+defaultExercises : WorkoutName -> List Exercise
 defaultExercises session =
     case session of
         Push ->
-            [ "Bench press"
-            , "Incline bench press"
-            , "Rope pull down"
+            [ Exercise 1 "Bench press" [] False emptySet
+            , Exercise 2 "Incline bench press" [] False emptySet
+            , Exercise 3 "Rope pull down" [] False emptySet
             ]
 
         Pull ->
-            [ "Pull ups"
-            , "Seated rows"
-            , "Bicep curls"
+            [ Exercise 4 "Pull ups" [] False emptySet
+            , Exercise 5 "Seated rows" [] False emptySet
+            , Exercise 6 "Bicep curls" [] False emptySet
             ]
 
         Legs ->
-            [ "Squats"
-            , "Lunges"
-            , "Calf raises"
+            [ Exercise 7 "Squats" [] False emptySet
+            , Exercise 8 "Lunges" [] False emptySet
+            , Exercise 9 "Calf raises" [] False emptySet
             ]
 
         UserDefined string ->
             []
 
 
-currentExercises : Maybe Workout -> List String
+emptySet : ( Result String Int, Result String Int )
+emptySet =
+    ( Err "", Err "" )
+
+
+currentExercises : Maybe Workout -> List Exercise
 currentExercises =
     Maybe.map .exercises >> Maybe.withDefault []
 

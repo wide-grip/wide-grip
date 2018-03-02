@@ -1,6 +1,6 @@
 module State exposing (..)
 
-import Data.Workout exposing (defaultExercises)
+import Data.Workout exposing (currentExercises, defaultExercises)
 import Types exposing (..)
 
 
@@ -39,12 +39,31 @@ update msg model =
         ConfirmExercises ->
             { model | view = StartAnExercise } ! []
 
+        StartExercise id ->
+            { model
+                | view = RecordSet
+                , currentWorkout = updateCurrentExercise id model.currentWorkout
+            }
+                ! []
+
+        InputWeight string ->
+            model ! []
+
+        InputReps string ->
+            model ! []
+
+
+updateCurrentExercise : Int -> Maybe Workout -> Maybe Workout
+updateCurrentExercise id =
+    Maybe.map (\workout -> { workout | currentExercise = Just id })
+
 
 initWorkoutWithWorkoutName : WorkoutName -> Maybe Workout
 initWorkoutWithWorkoutName workoutName =
     Just
         { workoutName = workoutName
         , exercises = defaultExercises workoutName
+        , currentExercise = Nothing
         }
 
 

@@ -11,6 +11,9 @@ type Msg
     = SetView View
     | StartWorkout WorkoutName
     | ConfirmExercises
+    | StartExercise Int
+    | InputWeight String
+    | InputReps String
 
 
 type View
@@ -19,6 +22,7 @@ type View
     | SelectSession
     | SelectExercisesForWorkout
     | StartAnExercise
+    | RecordSet
 
 
 type WorkoutName
@@ -30,5 +34,15 @@ type WorkoutName
 
 type alias Workout =
     { workoutName : WorkoutName
-    , exercises : List String
+    , exercises : List Exercise
+    , currentExercise : Maybe Int
+    }
+
+
+type alias Exercise =
+    { id : Int
+    , name : String
+    , sets : List ( Int, Int )
+    , complete : Bool
+    , currentSet : ( Result String Int, Result String Int )
     }
