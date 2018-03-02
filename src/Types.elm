@@ -9,7 +9,7 @@ type alias Model =
 
 type Msg
     = SetView View
-    | StartWorkout Session
+    | StartWorkout WorkoutName
     | ConfirmExercises
 
 
@@ -21,7 +21,7 @@ type View
     | StartAnExercise
 
 
-type Session
+type WorkoutName
     = Push
     | Pull
     | Legs
@@ -29,6 +29,6 @@ type Session
 
 
 type alias Workout =
-    { session : Session
+    { workoutName : WorkoutName
     , exercises : List String
     }

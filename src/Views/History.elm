@@ -2,7 +2,7 @@ module Views.History exposing (..)
 
 import Html exposing (..)
 import Types exposing (..)
-import Data.Workout exposing (sessionTypeToString)
+import Data.Workout exposing (workoutNameToString)
 
 
 view : Model -> Html Msg
@@ -14,4 +14,4 @@ view model =
 
 renderWorkout : Workout -> Html Msg
 renderWorkout workout =
-    div [] [ text <| sessionTypeToString workout.session ]
+    div [] [ text <| workoutNameToString workout.workoutName ]

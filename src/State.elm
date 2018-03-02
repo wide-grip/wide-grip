@@ -29,9 +29,9 @@ update msg model =
         SetView view ->
             { model | view = view } ! []
 
-        StartWorkout session ->
+        StartWorkout workoutName ->
             { model
-                | currentWorkout = initWorkoutWithSession session
+                | currentWorkout = initWorkoutWithWorkoutName workoutName
                 , view = SelectExercisesForWorkout
             }
                 ! []
@@ -40,11 +40,11 @@ update msg model =
             { model | view = StartAnExercise } ! []
 
 
-initWorkoutWithSession : Session -> Maybe Workout
-initWorkoutWithSession session =
+initWorkoutWithWorkoutName : WorkoutName -> Maybe Workout
+initWorkoutWithWorkoutName workoutName =
     Just
-        { session = session
-        , exercises = defaultExercises session
+        { workoutName = workoutName
+        , exercises = defaultExercises workoutName
         }
 
 

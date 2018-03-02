@@ -3,17 +3,17 @@ module Data.Workout exposing (..)
 import Types exposing (..)
 
 
-sessionTypeToString : Session -> String
-sessionTypeToString session =
-    case session of
+workoutNameToString : WorkoutName -> String
+workoutNameToString workoutName =
+    case workoutName of
         UserDefined str ->
             str
 
-        sessionType ->
-            toString sessionType
+        workoutName ->
+            toString workoutName
 
 
-defaultExercises : Session -> List String
+defaultExercises : WorkoutName -> List String
 defaultExercises session =
     case session of
         Push ->
@@ -43,6 +43,6 @@ currentExercises =
     Maybe.map .exercises >> Maybe.withDefault []
 
 
-currentSessionType : Maybe Workout -> Maybe Session
+currentSessionType : Maybe Workout -> Maybe WorkoutName
 currentSessionType =
-    Maybe.map .session
+    Maybe.map .workoutName

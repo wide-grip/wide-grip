@@ -5,7 +5,7 @@ import Types exposing (..)
 import Views.History as History
 import Views.Home as Home
 import Views.SelectExercisesForWorkout as SelectExercisesForWorkout
-import Views.SelectSession as SelectSession
+import Views.SelectWorkoutName as SelectWorkoutName
 import Views.StartAnExercise as StartAnExercise
 
 
@@ -19,7 +19,7 @@ view model =
             History.view model
 
         SelectSession ->
-            SelectSession.view model
+            SelectWorkoutName.view model
 
         SelectExercisesForWorkout ->
             SelectExercisesForWorkout.view model
