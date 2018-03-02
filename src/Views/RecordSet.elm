@@ -11,7 +11,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ logo "track workout"
-        , div [ class "center" ]
+        , div [ class "tc" ]
             [ input [ placeholder "kg", class "tc center", onInput InputWeight ] []
             , input [ placeholder "rep", class "tc center", onInput InputReps ] []
             ]

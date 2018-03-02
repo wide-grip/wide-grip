@@ -3,6 +3,7 @@ module State exposing (..)
 import Data.Workout exposing (currentExercises, defaultExercises)
 import Dict
 import Types exposing (..)
+import Dict exposing (Dict)
 
 
 -- INIT
@@ -48,19 +49,37 @@ update msg model =
                 ! []
 
         InputWeight string ->
-            { model
-                | currentWorkout = updateCurrentSet string model.currentWorkout
-            }
-                ! []
+            { model | currentWorkout = updateInputWeight string model.currentWorkout } ! []
 
         InputReps string ->
-            model ! []
+            { model | currentWorkout = updateInputReps string model.currentWorkout } ! []
 
 
-updateCurrentSet : String -> Maybe Workout -> Maybe Workout
-updateCurrentSet string workoutMaybe =
-    workoutMaybe
-        |> Maybe.map (\workout -> { workout | exercises = Dict.empty })
+updateInputReps : String -> Maybe Workout -> Maybe Workout
+updateInputReps string workoutMaybe =
+    workoutMaybe |> Maybe.map (\workout -> { workout | exercises = updateExercisesWith updateCurrentSetReps string workout.currentExercise workout.exercises })
+
+
+updateInputWeight : String -> Maybe Workout -> Maybe Workout
+updateInputWeight string workoutMaybe =
+    workoutMaybe |> Maybe.map (\workout -> { workout | exercises = updateExercisesWith updateCurrentSetWeight string workout.currentExercise workout.exercises })
+
+
+updateExercisesWith : (String -> Exercise -> Exercise) -> String -> Maybe Int -> Dict Int Exercise -> Dict Int Exercise
+updateExercisesWith f weightStr exerciseId exercises =
+    exerciseId
+        |> Maybe.map (\id -> Dict.update id (Maybe.map (f weightStr)) exercises)
+        |> Maybe.withDefault exercises
+
+
+updateCurrentSetReps : String -> Exercise -> Exercise
+updateCurrentSetReps weightStr exercise =
+    { exercise | currentSet = updateReps weightStr exercise.currentSet }
+
+
+updateCurrentSetWeight : String -> Exercise -> Exercise
+updateCurrentSetWeight weightStr exercise =
+    { exercise | currentSet = updateWeight weightStr exercise.currentSet }
 
 
 updateWeight : String -> CurrentSet -> CurrentSet
