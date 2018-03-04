@@ -1,5 +1,8 @@
 module Helpers.Style exposing (..)
 
+import Html exposing (Attribute)
+import Html.Attributes exposing (class)
+
 
 backgroundImage : String -> ( String, String )
 backgroundImage src =
@@ -14,3 +17,8 @@ widthStyle number =
 heightStyle : number -> ( String, String )
 heightStyle number =
     ( "height", toString number ++ "px" )
+
+
+classes : List String -> Attribute msg
+classes =
+    String.join " " >> class

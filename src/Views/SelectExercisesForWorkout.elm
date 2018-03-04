@@ -13,11 +13,16 @@ view : Model -> Html Msg
 view model =
     div [ class "tc" ]
         [ logo "track workout"
-        , div [] <| Dict.values <| Dict.map (\_ -> renderExercise) <| currentExercises model.currentWorkout
-        , button [ onClick ConfirmExercises ] [ text "Start (fist)" ]
+        , div [] <| renderDictValues renderExercise <| currentExercises model.currentWorkout
+        , button [ onClick ConfirmExercises, class "pointer" ] [ text "Start (fist)" ]
         ]
 
 
 renderExercise : Exercise -> Html Msg
 renderExercise exercise =
     p [] [ text exercise.name ]
+
+
+renderDictValues : (a -> Html msg) -> Dict comparable a -> List (Html msg)
+renderDictValues f =
+    Dict.map (always f) >> Dict.values

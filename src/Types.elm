@@ -16,6 +16,7 @@ type Msg
     | StartExercise Int
     | InputWeight String
     | InputReps String
+    | SubmitSet
 
 
 type View

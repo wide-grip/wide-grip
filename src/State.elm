@@ -1,9 +1,7 @@
 module State exposing (..)
 
-import Data.Workout exposing (currentExercises, defaultExercises)
-import Dict
+import Data.Workout exposing (..)
 import Types exposing (..)
-import Dict exposing (Dict)
 
 
 -- INIT
@@ -33,7 +31,7 @@ update msg model =
 
         StartWorkout workoutName ->
             { model
-                | currentWorkout = initWorkoutWithWorkoutName workoutName
+                | currentWorkout = Just <| initWorkoutWithName workoutName
                 , view = SelectExercisesForWorkout
             }
                 ! []
@@ -44,66 +42,26 @@ update msg model =
         StartExercise id ->
             { model
                 | view = RecordSet
-                , currentWorkout = updateCurrentExercise id model.currentWorkout
+                , currentWorkout = Maybe.map (updateCurrentExercise id) model.currentWorkout
             }
                 ! []
 
-        InputWeight string ->
-            { model | currentWorkout = updateInputWeight string model.currentWorkout } ! []
+        InputWeight weightStr ->
+            { model | currentWorkout = Maybe.map (inputWeight weightStr) model.currentWorkout } ! []
 
-        InputReps string ->
-            { model | currentWorkout = updateInputReps string model.currentWorkout } ! []
+        InputReps repStr ->
+            { model | currentWorkout = Maybe.map (inputReps repStr) model.currentWorkout } ! []
 
-
-updateInputReps : String -> Maybe Workout -> Maybe Workout
-updateInputReps string workoutMaybe =
-    workoutMaybe |> Maybe.map (\workout -> { workout | exercises = updateExercisesWith updateCurrentSetReps string workout.currentExercise workout.exercises })
+        SubmitSet ->
+            { model | currentWorkout = Maybe.map handleSubmitSet model.currentWorkout } ! []
 
 
-updateInputWeight : String -> Maybe Workout -> Maybe Workout
-updateInputWeight string workoutMaybe =
-    workoutMaybe |> Maybe.map (\workout -> { workout | exercises = updateExercisesWith updateCurrentSetWeight string workout.currentExercise workout.exercises })
-
-
-updateExercisesWith : (String -> Exercise -> Exercise) -> String -> Maybe Int -> Dict Int Exercise -> Dict Int Exercise
-updateExercisesWith f weightStr exerciseId exercises =
-    exerciseId
-        |> Maybe.map (\id -> Dict.update id (Maybe.map (f weightStr)) exercises)
-        |> Maybe.withDefault exercises
-
-
-updateCurrentSetReps : String -> Exercise -> Exercise
-updateCurrentSetReps weightStr exercise =
-    { exercise | currentSet = updateReps weightStr exercise.currentSet }
-
-
-updateCurrentSetWeight : String -> Exercise -> Exercise
-updateCurrentSetWeight weightStr exercise =
-    { exercise | currentSet = updateWeight weightStr exercise.currentSet }
-
-
-updateWeight : String -> CurrentSet -> CurrentSet
-updateWeight weightStr ( _, b ) =
-    ( String.toInt weightStr, b )
-
-
-updateReps : String -> CurrentSet -> CurrentSet
-updateReps repStr ( a, _ ) =
-    ( a, String.toInt repStr )
-
-
-updateCurrentExercise : Int -> Maybe Workout -> Maybe Workout
-updateCurrentExercise id =
-    Maybe.map (\workout -> { workout | currentExercise = Just id })
-
-
-initWorkoutWithWorkoutName : WorkoutName -> Maybe Workout
-initWorkoutWithWorkoutName workoutName =
-    Just
-        { workoutName = workoutName
-        , exercises = defaultExercises workoutName
-        , currentExercise = Nothing
-        }
+handleSubmitSet : Workout -> Workout
+handleSubmitSet workout =
+    if validSet workout then
+        { workout | exercises = updateExercisesWith submitSet workout.currentExercise workout.exercises }
+    else
+        workout
 
 
 
