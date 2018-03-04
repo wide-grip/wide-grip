@@ -1,23 +1,34 @@
 module Types exposing (..)
 
+import Date exposing (Date)
 import Dict exposing (Dict)
+import Json.Decode exposing (Value)
+import Time exposing (Time)
 
 
 type alias Model =
     { view : View
+    , today : Date
+    , exercises : Result String AllExercises
     , currentWorkout : Maybe Workout
     }
+
+
+type alias Flags =
+    { now : Time }
 
 
 type Msg
     = SetView View
     | StartWorkout WorkoutName
     | ConfirmExercises
-    | StartExercise Int
+    | StartExercise String
     | InputWeight String
     | InputReps String
     | SetCurrentUser User
     | SubmitSet
+    | FinishCurrentExercise
+    | ReceiveExercises Value
 
 
 type View
@@ -43,15 +54,29 @@ type User
     | Alex
 
 
+type alias AllExercises =
+    Dict String Exercise
+
+
+type alias Exercise =
+    { name : String
+    , workoutName : WorkoutName
+    }
+
+
 type alias Workout =
     { workoutName : WorkoutName
-    , exercises : Dict Int Exercise
-    , currentExercise : Maybe Int
+    , progress : WorkoutProgress
+    , currentExercise : Maybe String
     , users : List User
     }
 
 
-type alias Exercise =
+type alias WorkoutProgress =
+    Dict String ExerciseProgress
+
+
+type alias ExerciseProgress =
     { name : String
     , sets : List Set
     , complete : Bool

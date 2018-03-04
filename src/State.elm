@@ -1,20 +1,25 @@
 module State exposing (..)
 
+import Data.Ports exposing (receiveExercises)
 import Data.Workout exposing (..)
+import Date
+import Request.Exercises exposing (decodeExercises)
 import Types exposing (..)
 
 
 -- INIT
 
 
-init : ( Model, Cmd Msg )
-init =
-    initialModel ! []
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    initialModel flags ! []
 
 
-initialModel : Model
-initialModel =
+initialModel : Flags -> Model
+initialModel flags =
     { view = Home
+    , today = Date.fromTime flags.now
+    , exercises = Err "no exercises yet"
     , currentWorkout = Nothing
     }
 
@@ -30,11 +35,7 @@ update msg model =
             setView view model ! []
 
         StartWorkout workoutName ->
-            { model
-                | currentWorkout = initWorkout [ Rob, Andrew ] workoutName
-                , view = SelectExercisesForWorkout
-            }
-                ! []
+            handleStartWorkout workoutName model ! []
 
         ConfirmExercises ->
             setView StartAnExercise model ! []
@@ -58,17 +59,40 @@ update msg model =
         SubmitSet ->
             updateCurrentWorkout handleSubmitSet model ! []
 
+        FinishCurrentExercise ->
+            (model
+                |> updateCurrentWorkout handleFinishSet
+                |> setView StartAnExercise
+            )
+                ! []
+
+        ReceiveExercises val ->
+            { model | exercises = decodeExercises val } ! []
+
 
 setView : View -> Model -> Model
 setView view model =
     { model | view = view }
 
 
-initWorkout : List User -> WorkoutName -> Maybe Workout
-initWorkout users name =
+handleStartWorkout : WorkoutName -> Model -> Model
+handleStartWorkout workoutName model =
+    case model.exercises of
+        Ok allExercises ->
+            { model
+                | currentWorkout = initWorkout workoutName [ Rob, Andrew ] allExercises
+                , view = SelectExercisesForWorkout
+            }
+
+        Err _ ->
+            model
+
+
+initWorkout : WorkoutName -> List User -> AllExercises -> Maybe Workout
+initWorkout workoutName users allExercises =
     Just
-        { workoutName = name
-        , exercises = defaultExercises users name
+        { workoutName = workoutName
+        , progress = defaultExercises workoutName users allExercises
         , currentExercise = Nothing
         , users = users
         }
@@ -93,4 +117,4 @@ handleSubmitSet workout =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    receiveExercises ReceiveExercises
