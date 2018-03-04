@@ -74,28 +74,27 @@ currentExercises =
 
 
 updateCurrentUser : User -> Workout -> Workout
-updateCurrentUser user ({ currentExercise, exercises } as workout) =
-    { workout
-        | exercises = updateExercisesWith (setCurrentUser user) currentExercise exercises
-    }
+updateCurrentUser =
+    setCurrentUser >> updateCurrentExerciseWith
 
 
-inputReps : String -> Workout -> Workout
-inputReps string ({ currentExercise, exercises } as workout) =
-    { workout
-        | exercises = updateExercisesWith (updateCurrentSetReps string) currentExercise exercises
-    }
+updateInputReps : String -> Workout -> Workout
+updateInputReps =
+    updateCurrentSetReps >> updateCurrentExerciseWith
 
 
-inputWeight : String -> Workout -> Workout
-inputWeight weightStr ({ currentExercise, exercises } as workout) =
-    { workout
-        | exercises = updateExercisesWith (updateCurrentSetWeight weightStr) currentExercise exercises
-    }
+updateInputWeight : String -> Workout -> Workout
+updateInputWeight =
+    updateCurrentSetWeight >> updateCurrentExerciseWith
 
 
-updateExercisesWith : (Exercise -> Exercise) -> Maybe Int -> Dict Int Exercise -> Dict Int Exercise
-updateExercisesWith f exerciseId exercises =
+updateCurrentExerciseWith : (Exercise -> Exercise) -> Workout -> Workout
+updateCurrentExerciseWith f workout =
+    { workout | exercises = updateCurrentExerciseWith_ f workout.currentExercise workout.exercises }
+
+
+updateCurrentExerciseWith_ : (Exercise -> Exercise) -> Maybe Int -> Dict Int Exercise -> Dict Int Exercise
+updateCurrentExerciseWith_ f exerciseId exercises =
     exerciseId
         |> Maybe.map (\id -> Dict.update id (Maybe.map f) exercises)
         |> Maybe.withDefault exercises

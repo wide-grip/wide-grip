@@ -47,10 +47,10 @@ update msg model =
                 ! []
 
         InputWeight weightStr ->
-            updateCurrentWorkout (inputWeight weightStr) model ! []
+            updateCurrentWorkout (updateInputWeight weightStr) model ! []
 
         InputReps repStr ->
-            updateCurrentWorkout (inputReps repStr) model ! []
+            updateCurrentWorkout (updateInputReps repStr) model ! []
 
         SetCurrentUser user ->
             updateCurrentWorkout (updateCurrentUser user) model ! []
@@ -72,7 +72,7 @@ updateCurrentWorkout f model =
 handleSubmitSet : Workout -> Workout
 handleSubmitSet workout =
     if validSet workout then
-        { workout | exercises = updateExercisesWith submitSet workout.currentExercise workout.exercises }
+        updateCurrentExerciseWith submitSet workout
     else
         workout
 
