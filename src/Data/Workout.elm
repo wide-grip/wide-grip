@@ -14,43 +14,51 @@ workoutNameToString workoutName =
             toString workoutName
 
 
-defaultExercises : WorkoutName -> Dict Int Exercise
-defaultExercises session =
+defaultExercises : List User -> WorkoutName -> Dict Int Exercise
+defaultExercises users session =
     case session of
         Push ->
             Dict.fromList
-                [ exercise 1 "Bench press"
-                , exercise 2 "Incline bench press"
-                , exercise 3 "Rope pull down"
+                [ exercise 1 "Bench press" users
+                , exercise 2 "Incline bench press" users
+                , exercise 3 "Rope pull down" users
                 ]
 
         Pull ->
             Dict.fromList
-                [ exercise 4 "Pull ups"
-                , exercise 5 "Seated rows"
-                , exercise 6 "Bicep curls"
+                [ exercise 4 "Pull ups" users
+                , exercise 5 "Seated rows" users
+                , exercise 6 "Bicep curls" users
                 ]
 
         Legs ->
             Dict.fromList
-                [ exercise 7 "Squats"
-                , exercise 8 "Lunges"
-                , exercise 9 "Calf raises"
+                [ exercise 7 "Squats" users
+                , exercise 8 "Lunges" users
+                , exercise 9 "Calf raises" users
                 ]
 
         UserDefined string ->
             Dict.empty
 
 
-exercise : Int -> String -> ( Int, Exercise )
-exercise n name =
+exercise : Int -> String -> List User -> ( Int, Exercise )
+exercise n name users =
     ( n
     , { name = name
       , sets = []
       , complete = False
       , currentSet = emptySet
+      , currentUser = List.head users |> Maybe.withDefault Rob
       }
     )
+
+
+currentUser : Workout -> Maybe User
+currentUser workout =
+    workout
+        |> currentExercise
+        |> Maybe.map .currentUser
 
 
 emptySet : ( Result String Int, Result String Int )
@@ -63,6 +71,13 @@ emptySet =
 currentExercises : Maybe Workout -> Dict Int Exercise
 currentExercises =
     Maybe.map .exercises >> Maybe.withDefault Dict.empty
+
+
+updateCurrentUser : User -> Workout -> Workout
+updateCurrentUser user ({ currentExercise, exercises } as workout) =
+    { workout
+        | exercises = updateExercisesWith (setCurrentUser user) currentExercise exercises
+    }
 
 
 inputReps : String -> Workout -> Workout
@@ -84,6 +99,11 @@ updateExercisesWith f exerciseId exercises =
     exerciseId
         |> Maybe.map (\id -> Dict.update id (Maybe.map f) exercises)
         |> Maybe.withDefault exercises
+
+
+setCurrentUser : User -> Exercise -> Exercise
+setCurrentUser user exercise =
+    { exercise | currentUser = user }
 
 
 updateCurrentSetReps : String -> Exercise -> Exercise
@@ -111,11 +131,12 @@ updateCurrentExercise exerciseId workout =
     { workout | currentExercise = Just exerciseId }
 
 
-initWorkoutWithName : WorkoutName -> Workout
-initWorkoutWithName name =
+initWorkout : List User -> WorkoutName -> Workout
+initWorkout users name =
     { workoutName = name
-    , exercises = defaultExercises name
+    , exercises = defaultExercises users name
     , currentExercise = Nothing
+    , users = users
     }
 
 
@@ -123,15 +144,15 @@ submitSet : Exercise -> Exercise
 submitSet exercise =
     { exercise
         | currentSet = emptySet
-        , sets = appendSet exercise.currentSet exercise.sets
+        , sets = appendSet exercise.currentUser exercise.currentSet exercise.sets
     }
 
 
-appendSet : CurrentSet -> List ( Int, Int ) -> List ( Int, Int )
-appendSet currentSet sets =
+appendSet : User -> CurrentSet -> List Set -> List Set
+appendSet user currentSet sets =
     case currentSet of
         ( Ok weight, Ok reps ) ->
-            ( weight, reps ) :: sets
+            Set user weight reps :: sets
 
         _ ->
             sets

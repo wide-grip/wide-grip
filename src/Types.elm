@@ -16,6 +16,7 @@ type Msg
     | StartExercise Int
     | InputWeight String
     | InputReps String
+    | SetCurrentUser User
     | SubmitSet
 
 
@@ -35,18 +36,34 @@ type WorkoutName
     | UserDefined String
 
 
+type User
+    = Rob
+    | Andrew
+    | Eine
+    | Alex
+
+
 type alias Workout =
     { workoutName : WorkoutName
     , exercises : Dict Int Exercise
     , currentExercise : Maybe Int
+    , users : List User
     }
 
 
 type alias Exercise =
     { name : String
-    , sets : List ( Int, Int )
+    , sets : List Set
     , complete : Bool
     , currentSet : CurrentSet
+    , currentUser : User
+    }
+
+
+type alias Set =
+    { user : User
+    , weight : Int
+    , reps : Int
     }
 
 

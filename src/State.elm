@@ -31,7 +31,7 @@ update msg model =
 
         StartWorkout workoutName ->
             { model
-                | currentWorkout = Just <| initWorkoutWithName workoutName
+                | currentWorkout = Just <| initWorkout [ Rob, Andrew ] workoutName
                 , view = SelectExercisesForWorkout
             }
                 ! []
@@ -40,20 +40,33 @@ update msg model =
             { model | view = StartAnExercise } ! []
 
         StartExercise id ->
-            { model
-                | view = RecordSet
-                , currentWorkout = Maybe.map (updateCurrentExercise id) model.currentWorkout
-            }
+            (model
+                |> updateCurrentWorkout (updateCurrentExercise id)
+                |> updateView RecordSet
+            )
                 ! []
 
         InputWeight weightStr ->
-            { model | currentWorkout = Maybe.map (inputWeight weightStr) model.currentWorkout } ! []
+            updateCurrentWorkout (inputWeight weightStr) model ! []
 
         InputReps repStr ->
-            { model | currentWorkout = Maybe.map (inputReps repStr) model.currentWorkout } ! []
+            updateCurrentWorkout (inputReps repStr) model ! []
+
+        SetCurrentUser user ->
+            updateCurrentWorkout (updateCurrentUser user) model ! []
 
         SubmitSet ->
-            { model | currentWorkout = Maybe.map handleSubmitSet model.currentWorkout } ! []
+            updateCurrentWorkout handleSubmitSet model ! []
+
+
+updateView : View -> Model -> Model
+updateView view model =
+    { model | view = view }
+
+
+updateCurrentWorkout : (Workout -> Workout) -> Model -> Model
+updateCurrentWorkout f model =
+    { model | currentWorkout = Maybe.map f model.currentWorkout }
 
 
 handleSubmitSet : Workout -> Workout
