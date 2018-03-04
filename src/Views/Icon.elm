@@ -7,13 +7,18 @@ import Html.Attributes exposing (..)
 
 wideGripHeader : String -> Html msg
 wideGripHeader title =
-    div [ class "tc center mb5" ]
+    div [ class "tc center mb5 relative" ]
         [ div
             [ style
                 [ backgroundImage "img/wide-grip-logo.png"
                 , heightStyle 100
                 ]
-            , class "bg-center contain mw6 center"
+            , class "bg-center contain mw6 center relative z-1"
+            ]
+            []
+        , div
+            [ class "bg-navy absolute w-100 z-0 dn db-ns"
+            , style [ ( "top", "42px" ), heightStyle 14 ]
             ]
             []
         , h1 [ class "mt0 ttu tracked-mega navy" ] [ text title ]
