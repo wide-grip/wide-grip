@@ -20,4 +20,5 @@ view model =
 
 selectWorkoutName : WorkoutName -> Html Msg
 selectWorkoutName workoutName =
-    p [ onClick <| StartWorkout workoutName, class "pointer" ] [ text <| workoutNameToString workoutName ]
+    p [ onClick <| StartWorkout workoutName, class "pointer mv4 tracked ttu" ]
+        [ text <| workoutNameToString workoutName ]

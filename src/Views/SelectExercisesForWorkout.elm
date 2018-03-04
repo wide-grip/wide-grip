@@ -1,7 +1,8 @@
 module Views.SelectExercisesForWorkout exposing (..)
 
 import Data.Workout exposing (currentExercises)
-import Dict exposing (Dict)
+import Helpers.Html exposing (renderDictValues)
+import Helpers.Style exposing (classes)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (..)
@@ -14,15 +15,19 @@ view model =
     div [ class "tc" ]
         [ logo "track workout"
         , div [] <| renderDictValues renderExercise <| currentExercises model.currentWorkout
-        , button [ onClick ConfirmExercises, class "pointer" ] [ text "Start (fist)" ]
+        , div
+            [ onClick ConfirmExercises
+            , classes
+                [ "ph3 pv2 mt3 dib br-pill"
+                , "bg-navy white"
+                , "ttu tracked"
+                , "pointer"
+                ]
+            ]
+            [ text "Start (fist)" ]
         ]
 
 
 renderExercise : Exercise -> Html Msg
 renderExercise exercise =
-    p [] [ text exercise.name ]
-
-
-renderDictValues : (a -> Html msg) -> Dict comparable a -> List (Html msg)
-renderDictValues f =
-    Dict.map (always f) >> Dict.values
+    p [ class "mv4 ttu tracked" ] [ text exercise.name ]

@@ -11,6 +11,8 @@ view : Model -> Html Msg
 view model =
     div [ class "tc tracked-mega ttu" ]
         [ logo "wide grip"
-        , p [ onClick <| SetView SelectSession, class "pointer" ] [ text "Track Workout" ]
-        , p [ onClick <| SetView History, class "pointer" ] [ text "Your Gainz" ]
+        , div []
+            [ p [ onClick <| SetView SelectSession, class "pointer" ] [ text "Track Workout" ]
+            , p [ onClick <| SetView History, class "pointer" ] [ text "Your Gainz" ]
+            ]
         ]

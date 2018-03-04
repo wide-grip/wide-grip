@@ -13,19 +13,19 @@ view : Model -> Html Msg
 view model =
     div [ class "tc" ]
         [ logo "track workout"
-        , h2 [ class "mt0 mb4 ttu f4 tracked-mega" ] [ text <| exerciseName model.currentWorkout ]
+        , h2 [ class "mt0 mb4 ttu f4 sans-serif tracked-mega" ] [ text <| exerciseName model.currentWorkout ]
         , div [ class "mv4" ] <| List.map (user model) <| currentUsers model.currentWorkout
         , div []
             [ input
                 [ placeholder "kg"
-                , class "tc center"
+                , class "tc outline-0 center"
                 , value <| currentWeightInputValue model.currentWorkout
                 , onInput InputWeight
                 ]
                 []
             , input
                 [ placeholder "rep"
-                , class "tc center"
+                , class "tc outline-0 center"
                 , value <| currentRepsInputValue model.currentWorkout
                 , onInput InputReps
                 ]
@@ -51,7 +51,7 @@ user model u =
             [ "dib ba no-select pointer"
             , "br-pill"
             , "ph3 pv2 mh2"
-            , "ttu tracked"
+            , "ttu tracked f6"
             ]
         , classList
             [ ( "bg-navy b--navy white", isCurrentUser u model.currentWorkout )

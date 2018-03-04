@@ -130,15 +130,6 @@ updateCurrentExercise exerciseId workout =
     { workout | currentExercise = Just exerciseId }
 
 
-initWorkout : List User -> WorkoutName -> Workout
-initWorkout users name =
-    { workoutName = name
-    , exercises = defaultExercises users name
-    , currentExercise = Nothing
-    , users = users
-    }
-
-
 submitSet : Exercise -> Exercise
 submitSet exercise =
     { exercise

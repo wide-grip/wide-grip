@@ -27,22 +27,22 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SetView view ->
-            { model | view = view } ! []
+            setView view model ! []
 
         StartWorkout workoutName ->
             { model
-                | currentWorkout = Just <| initWorkout [ Rob, Andrew ] workoutName
+                | currentWorkout = initWorkout [ Rob, Andrew ] workoutName
                 , view = SelectExercisesForWorkout
             }
                 ! []
 
         ConfirmExercises ->
-            { model | view = StartAnExercise } ! []
+            setView StartAnExercise model ! []
 
         StartExercise id ->
             (model
                 |> updateCurrentWorkout (updateCurrentExercise id)
-                |> updateView RecordSet
+                |> setView RecordSet
             )
                 ! []
 
@@ -59,9 +59,19 @@ update msg model =
             updateCurrentWorkout handleSubmitSet model ! []
 
 
-updateView : View -> Model -> Model
-updateView view model =
+setView : View -> Model -> Model
+setView view model =
     { model | view = view }
+
+
+initWorkout : List User -> WorkoutName -> Maybe Workout
+initWorkout users name =
+    Just
+        { workoutName = name
+        , exercises = defaultExercises users name
+        , currentExercise = Nothing
+        , users = users
+        }
 
 
 updateCurrentWorkout : (Workout -> Workout) -> Model -> Model
