@@ -43,8 +43,8 @@ defaultExercises users session =
 
 
 exercise : Int -> String -> List User -> ( Int, Exercise )
-exercise n name users =
-    ( n
+exercise exerciseId name users =
+    ( exerciseId
     , { name = name
       , sets = []
       , complete = False
@@ -55,10 +55,8 @@ exercise n name users =
 
 
 currentUser : Workout -> Maybe User
-currentUser workout =
-    workout
-        |> currentExercise
-        |> Maybe.map .currentUser
+currentUser =
+    currentExercise >> Maybe.map .currentUser
 
 
 emptySet : ( Result String Int, Result String Int )
@@ -164,13 +162,13 @@ validInputSet currentSet =
 
 
 currentExerciseName : Workout -> Maybe String
-currentExerciseName workout =
-    currentExercise workout |> Maybe.map .name
+currentExerciseName =
+    currentExercise >> Maybe.map .name
 
 
 currentSet : Workout -> Maybe CurrentSet
-currentSet workout =
-    currentExercise workout |> Maybe.map .currentSet
+currentSet =
+    currentExercise >> Maybe.map .currentSet
 
 
 currentExercise : Workout -> Maybe Exercise
