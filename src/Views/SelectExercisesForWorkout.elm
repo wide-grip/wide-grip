@@ -1,22 +1,25 @@
 module Views.SelectExercisesForWorkout exposing (..)
 
 import Data.Workout exposing (currentExercises)
+import Helpers.Html exposing (renderDictValues)
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Types exposing (..)
-import Views.Logo exposing (logo)
+import Views.Icon exposing (fist, fistButton, wideGripHeader)
 
 
 view : Model -> Html Msg
 view model =
     div [ class "tc" ]
-        [ logo "track workout"
-        , div [] <| List.map renderExercise <| currentExercises model.currentWorkout
-        , button [ onClick ConfirmExercises ] [ text "Start (fist)" ]
+        [ wideGripHeader "track workout"
+        , div [] <| renderDictValues renderExercise <| currentExercises model.currentWorkout
+        , div [ onClick ConfirmExercises ]
+            [ fistButton "start"
+            ]
         ]
 
 
-renderExercise : String -> Html Msg
+renderExercise : ExerciseProgress -> Html Msg
 renderExercise exercise =
-    p [] [ text exercise ]
+    p [ class "mv4 ttu tracked" ] [ text exercise.name ]

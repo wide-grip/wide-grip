@@ -1,20 +1,25 @@
 module State exposing (..)
 
-import Data.Workout exposing (defaultExercises)
+import Data.Ports exposing (receiveExercises)
+import Data.Workout exposing (..)
+import Date
+import Request.Exercises exposing (decodeExercises)
 import Types exposing (..)
 
 
 -- INIT
 
 
-init : ( Model, Cmd Msg )
-init =
-    initialModel ! []
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    initialModel flags ! []
 
 
-initialModel : Model
-initialModel =
+initialModel : Flags -> Model
+initialModel flags =
     { view = Home
+    , today = Date.fromTime flags.now
+    , exercises = Err "no exercises yet"
     , currentWorkout = Nothing
     }
 
@@ -27,25 +32,83 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SetView view ->
-            { model | view = view } ! []
+            setView view model ! []
 
         StartWorkout workoutName ->
-            { model
-                | currentWorkout = initWorkoutWithWorkoutName workoutName
-                , view = SelectExercisesForWorkout
-            }
-                ! []
+            handleStartWorkout workoutName model ! []
 
         ConfirmExercises ->
-            { model | view = StartAnExercise } ! []
+            setView StartAnExercise model ! []
+
+        StartExercise id ->
+            (model
+                |> updateCurrentWorkout (updateCurrentExercise id)
+                |> setView RecordSet
+            )
+                ! []
+
+        InputWeight weightStr ->
+            updateCurrentWorkout (updateInputWeight weightStr) model ! []
+
+        InputReps repStr ->
+            updateCurrentWorkout (updateInputReps repStr) model ! []
+
+        SetCurrentUser user ->
+            updateCurrentWorkout (updateCurrentUser user) model ! []
+
+        SubmitSet ->
+            updateCurrentWorkout handleSubmitSet model ! []
+
+        FinishCurrentExercise ->
+            (model
+                |> updateCurrentWorkout handleFinishSet
+                |> setView StartAnExercise
+            )
+                ! []
+
+        ReceiveExercises val ->
+            { model | exercises = decodeExercises val } ! []
 
 
-initWorkoutWithWorkoutName : WorkoutName -> Maybe Workout
-initWorkoutWithWorkoutName workoutName =
+setView : View -> Model -> Model
+setView view model =
+    { model | view = view }
+
+
+handleStartWorkout : WorkoutName -> Model -> Model
+handleStartWorkout workoutName model =
+    case model.exercises of
+        Ok allExercises ->
+            { model
+                | currentWorkout = initWorkout workoutName [ Rob, Andrew ] allExercises
+                , view = SelectExercisesForWorkout
+            }
+
+        Err _ ->
+            model
+
+
+initWorkout : WorkoutName -> List User -> AllExercises -> Maybe Workout
+initWorkout workoutName users allExercises =
     Just
         { workoutName = workoutName
-        , exercises = defaultExercises workoutName
+        , progress = defaultExercises workoutName users allExercises
+        , currentExercise = Nothing
+        , users = users
         }
+
+
+updateCurrentWorkout : (Workout -> Workout) -> Model -> Model
+updateCurrentWorkout f model =
+    { model | currentWorkout = Maybe.map f model.currentWorkout }
+
+
+handleSubmitSet : Workout -> Workout
+handleSubmitSet workout =
+    if validSet workout then
+        updateCurrentExerciseWith submitSet workout
+    else
+        workout
 
 
 
@@ -54,4 +117,4 @@ initWorkoutWithWorkoutName workoutName =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    receiveExercises ReceiveExercises

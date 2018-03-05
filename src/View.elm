@@ -7,6 +7,7 @@ import Views.Home as Home
 import Views.SelectExercisesForWorkout as SelectExercisesForWorkout
 import Views.SelectWorkoutName as SelectWorkoutName
 import Views.StartAnExercise as StartAnExercise
+import Views.RecordSet as RecordSet
 
 
 view : Model -> Html Msg
@@ -26,3 +27,6 @@ view model =
 
         StartAnExercise ->
             StartAnExercise.view model
+
+        RecordSet ->
+            RecordSet.view model

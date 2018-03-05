@@ -2,13 +2,13 @@ module Main exposing (..)
 
 import Html
 import State exposing (init, subscriptions, update)
-import Types exposing (Model, Msg)
+import Types exposing (Flags, Model, Msg)
 import View exposing (view)
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , update = update
         , view = view
