@@ -20,5 +20,8 @@ view model =
 
 selectWorkoutName : WorkoutName -> Html Msg
 selectWorkoutName workoutName =
-    p [ onClick <| StartWorkout workoutName, class "pointer mv4 tracked ttu" ]
+    p
+        [ onClick <| StartWorkout workoutName
+        , class "pointer mv4 headline tracked ttu bg-animate hover-bg-navy bg-gray pa3 br-pill white mw5 center"
+        ]
         [ text <| renderWorkoutName workoutName ]
