@@ -29,6 +29,8 @@ type Msg
     | SubmitSet
     | FinishCurrentExercise
     | ReceiveExercises Value
+    | SubmitWorkout
+    | ReceiveSubmitWorkoutStatus FirebaseMessage
 
 
 type View
@@ -69,6 +71,7 @@ type alias Workout =
     , progress : WorkoutProgress
     , currentExercise : Maybe String
     , users : List User
+    , submitted : SubmitWorkoutStatus
     }
 
 
@@ -78,14 +81,14 @@ type alias WorkoutProgress =
 
 type alias ExerciseProgress =
     { name : String
-    , sets : List Set
+    , sets : List RecordedSet
     , complete : Bool
     , currentSet : CurrentSet
     , currentUser : User
     }
 
 
-type alias Set =
+type alias RecordedSet =
     { user : User
     , weight : Int
     , reps : Int
@@ -94,3 +97,15 @@ type alias Set =
 
 type alias CurrentSet =
     ( Result String Int, Result String Int )
+
+
+type alias FirebaseMessage =
+    { success : Bool
+    , reason : String
+    }
+
+
+type SubmitWorkoutStatus
+    = NotSubmitted
+    | Success
+    | Failure String

@@ -25,3 +25,15 @@ p, div {
 .mw5 {
   max-width: 20rem;
 }
+
+.bg-navy {
+  background-color: #3C4366;
+}
+
+.navy {
+  color: #3C4366;
+}
+
+.b--navy {
+  border-color: #3C4366;
+}

@@ -15,20 +15,21 @@
   <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-database.js"></script>
   <script src="js/firebase.js" charset="utf-8"></script>
   <script src="js/user.js" charset="utf-8"></script>
+  <script src="js/interop.js" charset="utf-8"></script>
   <script src="main.js" charset="utf-8"></script>
   <script>
-    var { getExercises, initDB } = window.DB
+    var { initDB } = window.DB
     var { getUser, setUser } = window.User
+    var AttachPorts = window.AttachPorts
 
     var app = Elm.Main.fullscreen({
       now: Date.now()
     })
 
-    // setUser('your email', 'password') only need to do this once
+    // setUser('your email', 'password') // only need to do this once
     var { email, password } = getUser()
 
     initDB(email, password)
-      .then(db => getExercises(db))
-      .then(ex => app.ports.receiveExercises.send(ex))
+      .then(db => AttachPorts(app, db))
   </script>
 </html>

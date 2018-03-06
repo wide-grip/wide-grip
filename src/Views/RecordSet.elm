@@ -32,7 +32,7 @@ view model =
                 []
             ]
         , nextSetButton model.currentWorkout
-        , div [ onClick FinishCurrentExercise ] [ fistButtonInverse "finished" ]
+        , div [] [ div [ class "dib", onClick FinishCurrentExercise ] [ fistButtonInverse "finished" ] ]
         ]
 
 

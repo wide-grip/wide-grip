@@ -131,11 +131,11 @@ finishSet exercise =
     }
 
 
-appendSet : User -> CurrentSet -> List Set -> List Set
+appendSet : User -> CurrentSet -> List RecordedSet -> List RecordedSet
 appendSet user currentSet sets =
     case currentSet of
         ( Ok weight, Ok reps ) ->
-            Set user weight reps :: sets
+            RecordedSet user weight reps :: sets
 
         _ ->
             sets

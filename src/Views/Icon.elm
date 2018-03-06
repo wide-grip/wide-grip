@@ -53,12 +53,11 @@ fistButton_ buttonStyle buttonText =
             [ "ph3 pv2 mt3 dib br-pill"
             , "ba"
             , "ttu tracked"
-            , "pointer"
             , fistButtonColors buttonStyle
             ]
         ]
         [ div [ class "flex items-center" ]
-            [ p [ class "ma0 mr2" ] [ text buttonText ]
+            [ p [ class "ma0 mr2 no-select" ] [ text buttonText ]
             , span [] [ fist ]
             ]
         ]
@@ -68,10 +67,10 @@ fistButtonColors : ButtonStyle -> String
 fistButtonColors buttonStyle =
     case buttonStyle of
         Regular ->
-            "bg-navy white b--navy"
+            "bg-navy white b--navy pointer"
 
         Inverse ->
-            "bg-white navy b--navy"
+            "bg-white navy b--navy pointer"
 
         Disabled ->
             "bg-white o-10"

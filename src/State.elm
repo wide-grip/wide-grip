@@ -1,8 +1,9 @@
 module State exposing (..)
 
-import Data.Ports exposing (receiveExercises)
+import Data.Ports exposing (..)
 import Data.Workout exposing (..)
 import Date
+import Request.EncodeWorkout exposing (encodeCurrentWorkout)
 import Request.Exercises exposing (decodeExercises)
 import Types exposing (..)
 
@@ -69,10 +70,23 @@ update msg model =
         ReceiveExercises val ->
             { model | exercises = decodeExercises val } ! []
 
+        SubmitWorkout ->
+            model ! [ handleSubmitWorkout model ]
+
+        ReceiveSubmitWorkoutStatus message ->
+            handleSubmitWorkoutStatus message model ! []
+
 
 setView : View -> Model -> Model
 setView view model =
     { model | view = view }
+
+
+handleSubmitWorkout : Model -> Cmd Msg
+handleSubmitWorkout model =
+    encodeCurrentWorkout model
+        |> Maybe.map submitWorkout
+        |> Maybe.withDefault Cmd.none
 
 
 handleStartWorkout : WorkoutName -> Model -> Model
@@ -80,12 +94,29 @@ handleStartWorkout workoutName model =
     case model.exercises of
         Ok allExercises ->
             { model
-                | currentWorkout = initWorkout workoutName [ Rob, Andrew ] allExercises
+                | currentWorkout = initWorkout workoutName [ Andrew, Rob ] allExercises
                 , view = SelectExercisesForWorkout
             }
 
         Err _ ->
             model
+
+
+handleSubmitWorkoutStatus : FirebaseMessage -> Model -> Model
+handleSubmitWorkoutStatus firebaseMessage model =
+    let
+        submitStatus =
+            messageToSubmitWorkoutStatus firebaseMessage
+    in
+        updateCurrentWorkout (\w -> { w | submitted = submitStatus }) model
+
+
+messageToSubmitWorkoutStatus : FirebaseMessage -> SubmitWorkoutStatus
+messageToSubmitWorkoutStatus message =
+    if message.success then
+        Success
+    else
+        Failure message.reason
 
 
 initWorkout : WorkoutName -> List User -> AllExercises -> Maybe Workout
@@ -95,6 +126,7 @@ initWorkout workoutName users allExercises =
         , progress = defaultExercises workoutName users allExercises
         , currentExercise = Nothing
         , users = users
+        , submitted = NotSubmitted
         }
 
 
@@ -117,4 +149,7 @@ handleSubmitSet workout =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    receiveExercises ReceiveExercises
+    Sub.batch
+        [ receiveExercises ReceiveExercises
+        , receiveSubmitWorkoutStatus ReceiveSubmitWorkoutStatus
+        ]

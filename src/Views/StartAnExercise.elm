@@ -6,7 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Types exposing (..)
-import Views.Icon exposing (fist, tick, wideGripHeader)
+import Views.Icon exposing (fist, fistButton, tick, wideGripHeader)
 
 
 view : Model -> Html Msg
@@ -14,6 +14,8 @@ view model =
     div []
         [ wideGripHeader "start an exercise"
         , div [ class "mt5 mw5 center" ] <| createExerciseList model.currentWorkout
+        , div [ onClick SubmitWorkout, class "center tc" ] [ fistButton "finish workout" ]
+        , div [ class "tc mt4" ] [ renderCurrentSubmitStatus model.currentWorkout ]
         ]
 
 
@@ -47,3 +49,23 @@ renderIcon exercise =
         tick
     else
         fist
+
+
+renderCurrentSubmitStatus : Maybe Workout -> Html msg
+renderCurrentSubmitStatus currentWorkout =
+    currentWorkout
+        |> Maybe.map (.submitted >> renderSubmitStatus)
+        |> Maybe.withDefault (span [] [])
+
+
+renderSubmitStatus : SubmitWorkoutStatus -> Html msg
+renderSubmitStatus submitWorkoutStatus =
+    case submitWorkoutStatus of
+        Success ->
+            p [ class "green" ] [ text "Workout Saved!" ]
+
+        Failure _ ->
+            p [ class "red" ] [ text "There was a problem submitting your workout" ]
+
+        _ ->
+            span [] []
