@@ -15,21 +15,29 @@ view model =
         [ wideGripHeader "track workout"
         , h2 [ class "mt0 mb4 ttu f4 sans-serif tracked-mega" ] [ text <| exerciseName model.currentWorkout ]
         , div [ class "mv4" ] <| List.map (user model) <| currentUsers model.currentWorkout
-        , div []
-            [ input
-                [ placeholder "kg"
-                , class "tc outline-0 center pa2"
-                , value <| currentWeightInputValue model.currentWorkout
-                , onInput InputWeight
+        , div [ class "f4 tracked flex flex-wrap mw6 center" ]
+            [ div [ class "w-100 w-50-ns" ]
+                [ h4 [ class "ttu sans-serif mv2" ] [ text "Weight" ]
+                , input
+                    [ placeholder "Kg"
+                    , type_ "number"
+                    , class "tc outline-0 center pa2 mb3 w-80 center"
+                    , value <| currentWeightInputValue model.currentWorkout
+                    , onInput InputWeight
+                    ]
+                    []
                 ]
-                []
-            , input
-                [ placeholder "rep"
-                , class "tc outline-0 center pa2"
-                , value <| currentRepsInputValue model.currentWorkout
-                , onInput InputReps
+            , div [ class "w-100 w-50-ns" ]
+                [ h4 [ class "ttu sans-serif mv2" ] [ text "Reps" ]
+                , input
+                    [ placeholder "Reps"
+                    , type_ "number"
+                    , class "tc outline-0 center pa2 mb2 w-80 center"
+                    , value <| currentRepsInputValue model.currentWorkout
+                    , onInput InputReps
+                    ]
+                    []
                 ]
-                []
             ]
         , nextSetButton model.currentWorkout
         , div [] [ div [ class "dib", onClick FinishCurrentExercise ] [ fistButtonInverse "finished" ] ]

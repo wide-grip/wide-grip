@@ -27,11 +27,11 @@ createExerciseList =
 renderExercise : String -> ExerciseProgress -> Html Msg
 renderExercise id exercise =
     div
-        [ class "flex pointer justify-between items-center"
+        [ class "flex pointer justify-between mb3 bg-animate hover-bg-navy hover-white items-center br-pill ba b--navy"
         , handleStart id exercise
         ]
-        [ p [ class "ttu mv4 tracked" ] [ text exercise.name ]
-        , renderIcon exercise
+        [ p [ class "ttu ma3 tracked" ] [ text exercise.name ]
+        , div [ class "ma3" ] [ renderIcon exercise ]
         ]
 
 

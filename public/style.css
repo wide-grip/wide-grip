@@ -37,3 +37,15 @@ p, div {
 .b--navy {
   border-color: #3C4366;
 }
+
+.bg-red {
+  background-color: #E76464;
+}
+
+.red {
+  color: #E76464;
+}
+
+.b--red {
+  border-color: #E76464;
+}

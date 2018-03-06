@@ -20,8 +20,16 @@ renderOptions allExercises =
     case allExercises of
         Ok _ ->
             div []
-                [ p [ onClick <| SetView SelectSession, class "pointer mb4" ] [ text "Track Workout" ]
-                , p [ onClick <| SetView History, class "pointer mb4" ] [ text "Your Gainz" ]
+                [ p
+                    [ onClick <| SetView SelectSession
+                    , class "white headline pointer mb4 bg-navy pa4 br-pill mw5 center"
+                    ]
+                    [ text "Track Workout" ]
+                , p
+                    [ onClick <| SetView History
+                    , class "white headline pointer mb4 bg-red pa4 br-pill mw5 center"
+                    ]
+                    [ text "Your Gainz" ]
                 ]
 
         Err _ ->
