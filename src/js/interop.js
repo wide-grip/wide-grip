@@ -1,11 +1,11 @@
-const {
+import {
   successMessage,
   errorMessage,
   getExercises,
   submitWorkout
-} = require('./firebase.js')
+} from './firebase.js'
 
-function init(elmApp, db) {
+export function init(elmApp, db) {
 
   const { ports } = elmApp
 
@@ -35,8 +35,4 @@ function init(elmApp, db) {
   function sendExercisesToIncomingPort (exercises) {
     ports.receiveExercises.send(exercises)
   }
-}
-
-module.exports = {
-  init
 }

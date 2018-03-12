@@ -1,14 +1,14 @@
-var { initDB } = require('./firebase.js')
-var { getUser, setUser } = require('./localstorage.js')
-var interop = require('./interop.js')
-var Elm = window.Elm
+import { initDB } from './firebase.js'
+import { getUser, setUser } from './localstorage.js'
+import * as interop from './interop.js'
+const { Elm } = window
 
-var app = Elm.Main.fullscreen({
+const app = Elm.Main.fullscreen({
   now: Date.now()
 })
 
 setUser('robertefrancis18@gmail.com', 'wide-grip')
-var { email, password } = getUser()
+const { email, password } = getUser()
 
 initDB(email, password)
   .then(db => interop.init(app, db))

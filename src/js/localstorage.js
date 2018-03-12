@@ -1,20 +1,15 @@
-const localStorage = window.localStorage
+const { localStorage } = window
 const emailKey = 'wide-grip-email'
 const passwordKey = 'wide-grip-password'
 
-function setUser (email, password) {
+export function setUser (email, password) {
   localStorage.setItem(emailKey, email)
   localStorage.setItem(passwordKey, password)
 }
 
-function getUser () {
+export function getUser () {
   return {
     email: localStorage.getItem(emailKey),
     password: localStorage.getItem(passwordKey)
   }
-}
-
-module.exports = {
-  setUser,
-  getUser
 }

@@ -1,6 +1,6 @@
-const firebase = require('firebase/app')
-require('firebase/auth')
-require('firebase/database')
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/database'
 
 const config = {
   apiKey: "AIzaSyAS81CgQloq4VMbaVR6PBkAIIWyxD-UDOo",
@@ -11,7 +11,7 @@ const config = {
   messagingSenderId: "673417757978"
 }
 
-function initDB (email, password) {
+export function initDB (email, password) {
   firebase.initializeApp(config)
   return _authenticate(firebase, email, password)
 }
@@ -26,31 +26,16 @@ function _authenticate (_firebase, email, password) {
     }))
 }
 
-function addExercises (db) {
-  return [
-    { name: "Bench Press", workoutName: "Push" },
-    { name: "Incline Bench Press", workoutName: "Push" },
-    { name: "Rope Pull Down", workoutName: "Push" },
-    { name: "Pull Ups", workoutName: "Pull" },
-    { name: "Seated Rows", workoutName: "Pull" },
-    { name: "Bicep Curls", workoutName: "Pull" },
-    { name: "Squats", workoutName: "Legs" },
-    { name: "Lunges", workoutName: "Legs" },
-    { name: "Calf Raises", workoutName: "Legs" },
-  ]
-  .forEach(ex => { addNewExercise(db, ex) })
-}
-
 // Exercise { name: String, workoutName: String }
-function addNewExercise (db, exercise) {
+export function addNewExercise (db, exercise) {
   return db.exercises.push().set(exercise)
 }
 
-function getExercises (db) {
+export function getExercises (db) {
   return db.exercises.once('value').then(snapshot => snapshot.val())
 }
 
-function submitWorkout (db, workout) {
+export function submitWorkout (db, workout) {
   return db.workouts.once('value')
     .then(snapshot => snapshot.val())
     .then(snapVal => _addWorkoutToSnapshotValue(workout, snapVal))
@@ -63,20 +48,10 @@ function _addWorkoutToSnapshotValue (workout, snapVal) {
   return newSnapshot
 }
 
-function successMessage () {
+export function successMessage () {
   return { success: true, reason: "" }
 }
 
-function errorMessage (reason) {
+export function errorMessage (reason) {
   return { success: false, reason: reason }
-}
-
-module.exports = {
-  getExercises,
-  addExercises,
-  submitWorkout,
-  addNewExercise,
-  initDB,
-  successMessage,
-  errorMessage,
 }
