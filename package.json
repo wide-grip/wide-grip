@@ -9,8 +9,8 @@
     "dev": "npm run elm-dev & npm run js-dev & npm run css-dev",
     "elm-dev": "elm-live src/elm/Main.elm --output=public/elm.js --dir=public --debug --pushstate --open",
     "elm-build": "elm-make src/elm/Main.elm --output=public/elm.js",
-    "js-dev": "watchify src/js/index.js -o public/embed.js -t [ babelify --presets [env] ] --verbose",
-    "js-build": "browserify src/js/index.js -o public/embed.js -t [ babelify --presets [env] ] --verbose",
+    "js-dev": "watchify src/js/index.js -o public/embed.js --verbose",
+    "js-build": "browserify src/js/index.js -o public/embed.js --verbose",
     "css-dev": "postcss src/css/index.css --output public/style.min.css --watch --config postcss.config.js --verbose",
     "css-build": "postcss src/css/index.css --output public/style.min.css --config postcss.config.js --verbose",
     "compress": "npm run compress-main & npm run compress-embed",
@@ -44,5 +44,10 @@
   "dependencies": {
     "firebase": "^4.11.0",
     "tachyons-custom": "^4.9.4"
+  },
+  "browserify": {
+    "transform": [
+      [ "babelify", { "presets": [ "env" ] } ]
+    ]
   }
 }

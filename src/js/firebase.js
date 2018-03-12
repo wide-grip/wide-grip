@@ -1,18 +1,10 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/database'
-
-const config = {
-  apiKey: "AIzaSyAS81CgQloq4VMbaVR6PBkAIIWyxD-UDOo",
-  authDomain: "wide-grip.firebaseapp.com",
-  databaseURL: "https://wide-grip.firebaseio.com",
-  projectId: "wide-grip",
-  storageBucket: "wide-grip.appspot.com",
-  messagingSenderId: "673417757978"
-}
+import { config } from "./firebase-config.js"
 
 export function initDB (email, password) {
-  firebase.initializeApp(config)
+  firebase.initializeApp(config())
   return _authenticate(firebase, email, password)
 }
 
