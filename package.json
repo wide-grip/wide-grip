@@ -4,8 +4,18 @@
   "description": "a PWA gym tracker to help you get gainz",
   "main": "index.js",
   "scripts": {
-    "dev": "elm-live src/Main.elm --output=public/main.js --dir=public --debug --pushstate --open",
-    "build": "elm-make src/Main.elm --output=public/main.js"
+    "deploy": "npm run build && npm run compress && firebase deploy",
+    "build": "npm run elm-build & npm run js-build & npm run css-build",
+    "dev": "npm run elm-dev & npm run js-dev & npm run css-dev",
+    "elm-dev": "elm-live src/elm/Main.elm --output=public/elm.js --dir=public --debug --pushstate --open",
+    "elm-build": "elm-make src/elm/Main.elm --output=public/elm.js",
+    "js-dev": "watchify src/js/index.js -o public/embed.js -t [ babelify --presets [env] ] --verbose",
+    "js-build": "browserify src/js/index.js -o public/embed.js -t [ babelify --presets [env] ] --verbose",
+    "css-dev": "postcss src/css/index.css --output public/style.min.css --watch --config postcss.config.js --verbose",
+    "css-build": "postcss src/css/index.css --output public/style.min.css --config postcss.config.js --verbose",
+    "compress": "npm run compress-main & npm run compress-embed",
+    "compress-main": "uglifyjs -c -m -o public/elm.js public/elm.js",
+    "compress-embed": "uglifyjs -c -m -o public/embed.js public/embed.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +28,21 @@
   },
   "homepage": "https://github.com/wide-grip/wide-grip#readme",
   "devDependencies": {
-    "elm-live": "^2.7.5"
+    "autoprefixer": "^8.1.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babelify": "^8.0.0",
+    "browserify": "^16.1.1",
+    "elm-live": "^2.7.5",
+    "postcss-clean": "^1.1.0",
+    "postcss-cli": "^5.0.0",
+    "postcss-custom-media": "^6.0.0",
+    "postcss-custom-properties": "^7.0.0",
+    "postcss-import": "^11.1.0",
+    "watchify": "^3.11.0"
+  },
+  "dependencies": {
+    "firebase": "^4.11.0",
+    "tachyons-custom": "^4.9.4"
   }
 }

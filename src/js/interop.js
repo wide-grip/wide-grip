@@ -1,12 +1,17 @@
-var AttachPorts = function (elmApp, db) {
+const {
+  successMessage,
+  errorMessage,
+  getExercises,
+  submitWorkout
+} = require('./firebase.js')
 
-  var { successMessage, errorMessage, getExercises, submitWorkout } = window.DB
-  var { ports } = elmApp
+function init(elmApp, db) {
 
-  // calls all below functions
-  init()
+  const { ports } = elmApp
 
-  function init () {
+  attachPorts()
+
+  function attachPorts () {
     return Promise.resolve()
       .then(subscribeSubmitWorkout)
       .then(() => getExercises(db))
@@ -30,4 +35,8 @@ var AttachPorts = function (elmApp, db) {
   function sendExercisesToIncomingPort (exercises) {
     ports.receiveExercises.send(exercises)
   }
+}
+
+module.exports = {
+  init
 }

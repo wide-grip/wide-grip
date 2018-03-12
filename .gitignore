@@ -5,8 +5,15 @@ repl-temp-*
 
 # JS files
 node_modules
-public/main.js
+public/elm.js
+public/embed.js
 package-lock.json
+
+# CSS
+public/style.min.css
 
 # Design Files
 *.sketch
+
+# Backup files
+backups
