@@ -58,7 +58,11 @@ update msg model =
             updateCurrentWorkout (updateCurrentUser user) model ! []
 
         SubmitSet ->
-            updateCurrentWorkout handleSubmitSet model ! []
+            let
+                newModel =
+                    updateCurrentWorkout handleSubmitSet model
+            in
+                newModel ! [ handleCacheWorkout newModel ]
 
         FinishCurrentExercise ->
             (model
@@ -80,6 +84,14 @@ update msg model =
 setView : View -> Model -> Model
 setView view model =
     { model | view = view }
+
+
+handleCacheWorkout : Model -> Cmd Msg
+handleCacheWorkout model =
+    encodeCurrentWorkout model
+        |> Maybe.map cacheCurrentWorkout
+        |> Debug.log ""
+        |> Maybe.withDefault Cmd.none
 
 
 handleSubmitWorkout : Model -> Cmd Msg

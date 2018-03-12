@@ -21,3 +21,7 @@ export function getExercises () {
 export function setExercises (exercises) {
   return localStorage.setItem('exercises', JSON.stringify(exercises))
 }
+
+export function setCurrentWorkout (currentWorkout) {
+  return localStorage.setItem('currentWorkout', JSON.stringify(currentWorkout))
+}

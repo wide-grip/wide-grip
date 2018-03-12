@@ -11,6 +11,7 @@ export function init(elmApp, db) {
     return Promise.resolve()
       .then(subscribeSubmitWorkout)
       .then(handleGetExercises)
+      .then(subscribeCacheCurrentWorkout)
   }
 
   function subscribeSubmitWorkout () {
@@ -47,5 +48,9 @@ export function init(elmApp, db) {
         localStorage.setExercises(exercises)
         sendExercisesToIncomingPort(exercises)
       })
+  }
+
+  function subscribeCacheCurrentWorkout () {
+    ports.cacheCurrentWorkout.subscribe(currentWorkout => localStorage.setCurrentWorkout(currentWorkout))
   }
 }

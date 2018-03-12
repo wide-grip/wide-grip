@@ -11,3 +11,6 @@ port receiveSubmitWorkoutStatus : (FirebaseMessage -> msg) -> Sub msg
 
 
 port submitWorkout : Value -> Cmd msg
+
+
+port cacheCurrentWorkout : Value -> Cmd msg
