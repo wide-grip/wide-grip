@@ -3,33 +3,12 @@
   <head>
     <meta charset="utf-8">
     <title>Wide Grip - Big Back</title>
-    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.9.1/css/tachyons.min.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Alfa+Slab+One" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.min.css">
   </head>
   <body>
   </body>
-  <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-database.js"></script>
-  <script src="js/firebase.js" charset="utf-8"></script>
-  <script src="js/user.js" charset="utf-8"></script>
-  <script src="js/interop.js" charset="utf-8"></script>
-  <script src="main.js" charset="utf-8"></script>
-  <script>
-    var { initDB } = window.DB
-    var { getUser, setUser } = window.User
-    var AttachPorts = window.AttachPorts
-
-    var app = Elm.Main.fullscreen({
-      now: Date.now()
-    })
-
-    setUser('robertefrancis18@gmail.com', 'wide-grip')
-    var { email, password } = getUser()
-
-    initDB(email, password)
-      .then(db => AttachPorts(app, db))
-  </script>
+  <script src="elm.js" charset="utf-8"></script>
+  <script src="embed.js" charset="utf-8"></script>
 </html>

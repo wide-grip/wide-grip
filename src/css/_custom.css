@@ -1,0 +1,15 @@
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--headline);
+}
+
+p, div {
+  font-family: var(--sans-serif);
+}
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
