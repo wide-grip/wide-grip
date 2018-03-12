@@ -25,6 +25,7 @@ export function init(elmApp, db) {
 
     return firebase.submitWorkout(db, workoutData)
       .then(() => submitPort.send(success))
+      .then(() => localStorage.removeCurrentWorkout())
       .catch(() => submitPort.send(error))
   }
 

@@ -25,3 +25,7 @@ export function setExercises (exercises) {
 export function setCurrentWorkout (currentWorkout) {
   return localStorage.setItem('currentWorkout', JSON.stringify(currentWorkout))
 }
+
+export function removeCurrentWorkout () {
+  return localStorage.removeItem('currentWorkout')
+}
