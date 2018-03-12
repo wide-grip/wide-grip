@@ -20,36 +20,31 @@ encodeWorkout today workout =
             object
                 [ ( "date", float <| Date.toTime today )
                 , ( "workoutName", string <| toString workout.workoutName )
-                , ( "exercises", list <| encodeAllExercises workout )
+                , ( "exercises", object <| encodeAllExercises workout )
                 ]
 
 
-encodeAllExercises : Workout -> List Value
+encodeAllExercises : Workout -> List ( String, Value )
 encodeAllExercises workout =
     workout.progress
-        |> Dict.filter (always nonEmptyExercise)
         |> Dict.map encodeExercise
         |> Dict.values
-        |> List.concat
 
 
-nonEmptyExercise : ExerciseProgress -> Bool
-nonEmptyExercise progress =
-    progress.sets
-        |> List.isEmpty
-        |> not
-
-
-encodeExercise : String -> ExerciseProgress -> List Value
+encodeExercise : String -> ExerciseProgress -> ( String, Value )
 encodeExercise exerciseId progress =
-    List.map (encodeRecordedSet exerciseId) progress.sets
+    ( exerciseId
+    , object
+        [ ( "complete", bool progress.complete )
+        , ( "sets", list <| List.map (encodeRecordedSet) progress.sets )
+        ]
+    )
 
 
-encodeRecordedSet : String -> RecordedSet -> Value
-encodeRecordedSet exerciseId recordedSet =
+encodeRecordedSet : RecordedSet -> Value
+encodeRecordedSet recordedSet =
     object
         [ ( "user", string <| toString recordedSet.user )
         , ( "weight", int recordedSet.weight )
         , ( "reps", int recordedSet.reps )
-        , ( "exerciseId", string exerciseId )
         ]
