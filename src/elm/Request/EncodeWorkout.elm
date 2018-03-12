@@ -20,8 +20,17 @@ encodeWorkout today workout =
             object
                 [ ( "date", float <| Date.toTime today )
                 , ( "workoutName", string <| toString workout.workoutName )
+                , ( "currentExercise", currentExerciseEncoder workout.currentExercise )
+                , ( "users", list <| List.map (toString >> string) workout.users )
                 , ( "exercises", object <| encodeAllExercises workout )
                 ]
+
+
+currentExerciseEncoder : Maybe String -> Value
+currentExerciseEncoder currentExercise =
+    currentExercise
+        |> Maybe.map string
+        |> Maybe.withDefault null
 
 
 encodeAllExercises : Workout -> List ( String, Value )

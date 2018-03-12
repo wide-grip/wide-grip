@@ -12,6 +12,7 @@ export function init(elmApp, db) {
       .then(subscribeSubmitWorkout)
       .then(handleGetExercises)
       .then(subscribeCacheCurrentWorkout)
+      .then(restoreCurrentWorkoutState)
   }
 
   function subscribeSubmitWorkout () {
@@ -34,8 +35,8 @@ export function init(elmApp, db) {
   }
 
   function handleGetExercises () {
-    if (localStorage.getExercises()) {
-      const exercises = JSON.parse(localStorage.getExercises())
+    const exercises = localStorage.getExercises()
+    if (exercises) {
       sendExercisesToIncomingPort(exercises)
       refreshExerciseCache()
     } else {
@@ -53,5 +54,12 @@ export function init(elmApp, db) {
 
   function subscribeCacheCurrentWorkout () {
     ports.cacheCurrentWorkout.subscribe(currentWorkout => localStorage.setCurrentWorkout(currentWorkout))
+  }
+
+  function restoreCurrentWorkoutState () {
+    const currentWorkout = localStorage.getCurrentWorkout()
+    if (currentWorkout) {
+      ports.receiveCurrentWorkoutState.send(currentWorkout)
+    }
   }
 }

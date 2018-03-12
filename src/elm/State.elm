@@ -3,6 +3,8 @@ module State exposing (..)
 import Data.Ports exposing (..)
 import Data.Workout exposing (..)
 import Date
+import Json.Decode exposing (Value, decodeValue)
+import Request.DecodeCurrentWorkout exposing (workoutDecoder)
 import Request.EncodeWorkout exposing (encodeCurrentWorkout)
 import Request.Exercises exposing (decodeExercises)
 import Types exposing (..)
@@ -80,6 +82,22 @@ update msg model =
         ReceiveSubmitWorkoutStatus message ->
             handleSubmitWorkoutStatus message model ! []
 
+        ReceiveCachedCurrentWorkoutState val ->
+            handleRestoreCurrentWorkoutFromCache val model ! []
+
+
+handleRestoreCurrentWorkoutFromCache : Value -> Model -> Model
+handleRestoreCurrentWorkoutFromCache workoutValue model =
+    case decodeValue workoutDecoder workoutValue of
+        Ok workout ->
+            { model
+                | currentWorkout = Just workout
+                , view = RecordSet
+            }
+
+        Err _ ->
+            model
+
 
 setView : View -> Model -> Model
 setView view model =
@@ -90,7 +108,6 @@ handleCacheWorkout : Model -> Cmd Msg
 handleCacheWorkout model =
     encodeCurrentWorkout model
         |> Maybe.map cacheCurrentWorkout
-        |> Debug.log ""
         |> Maybe.withDefault Cmd.none
 
 
@@ -164,4 +181,5 @@ subscriptions model =
     Sub.batch
         [ receiveExercises ReceiveExercises
         , receiveSubmitWorkoutStatus ReceiveSubmitWorkoutStatus
+        , receiveCurrentWorkoutState ReceiveCachedCurrentWorkoutState
         ]

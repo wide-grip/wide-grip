@@ -31,6 +31,7 @@ type Msg
     | ReceiveExercises Value
     | SubmitWorkout
     | ReceiveSubmitWorkoutStatus FirebaseMessage
+    | ReceiveCachedCurrentWorkoutState Value
 
 
 type View

@@ -1,6 +1,7 @@
 module Views.RecordSet exposing (..)
 
 import Data.Workout exposing (currentExerciseName, currentSet, currentUser, validSet)
+import Dict
 import Helpers.Style exposing (classes)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -13,7 +14,7 @@ view : Model -> Html Msg
 view model =
     div [ class "tc" ]
         [ wideGripHeader "track workout"
-        , h2 [ class "mt0 mb4 ttu f4 sans-serif tracked-mega" ] [ text <| exerciseName model.currentWorkout ]
+        , h2 [ class "mt0 mb4 ttu f4 sans-serif tracked-mega" ] [ text <| exerciseName model.exercises model.currentWorkout ]
         , div [ class "mv4" ] <| List.map (user model) <| currentUsers model.currentWorkout
         , div [ class "f4 tracked flex flex-wrap mw6 center" ]
             [ div [ class "w-100 w-50-ns" ]
@@ -85,11 +86,20 @@ currentUsers =
     Maybe.map .users >> Maybe.withDefault []
 
 
-exerciseName : Maybe Workout -> String
-exerciseName workout =
-    workout
-        |> Maybe.andThen currentExerciseName
+exerciseName : Result String AllExercises -> Maybe Workout -> String
+exerciseName allExercises currentWorkout =
+    allExercises
+        |> Result.toMaybe
+        |> Maybe.map2 getName_ currentWorkout
+        |> Maybe.andThen identity
         |> Maybe.withDefault ""
+
+
+getName_ : Workout -> AllExercises -> Maybe String
+getName_ workout allExercises =
+    allExercises
+        |> Dict.get (workout.currentExercise |> Maybe.withDefault "")
+        |> Maybe.map .name
 
 
 currentRepsInputValue : Maybe Workout -> String

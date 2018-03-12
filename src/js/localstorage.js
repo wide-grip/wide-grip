@@ -15,7 +15,7 @@ export function getUser () {
 }
 
 export function getExercises () {
-  return localStorage.getItem('exercises')
+  return JSON.parse(localStorage.getItem('exercises'))
 }
 
 export function setExercises (exercises) {
@@ -24,6 +24,10 @@ export function setExercises (exercises) {
 
 export function setCurrentWorkout (currentWorkout) {
   return localStorage.setItem('currentWorkout', JSON.stringify(currentWorkout))
+}
+
+export function getCurrentWorkout () {
+  return JSON.parse(localStorage.getItem('currentWorkout'))
 }
 
 export function removeCurrentWorkout () {
