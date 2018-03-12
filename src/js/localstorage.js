@@ -13,3 +13,11 @@ export function getUser () {
     password: localStorage.getItem(passwordKey)
   }
 }
+
+export function getExercises () {
+  return localStorage.getItem('exercises')
+}
+
+export function setExercises (exercises) {
+  return localStorage.setItem('exercises', JSON.stringify(exercises))
+}
