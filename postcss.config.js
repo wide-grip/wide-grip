@@ -4,6 +4,6 @@ module.exports = {
     require('autoprefixer')(),
     require('postcss-custom-media')(),
     require('postcss-clean')(),
-    require('postcss-custom-properties')()
+    require('postcss-custom-properties')({ preserve: false })
   ]
 }

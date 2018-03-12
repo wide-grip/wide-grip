@@ -47,7 +47,14 @@
   },
   "browserify": {
     "transform": [
-      [ "babelify", { "presets": [ "env" ] } ]
+      [
+        "babelify",
+        {
+          "presets": [
+            "env"
+          ]
+        }
+      ]
     ]
   }
 }
