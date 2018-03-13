@@ -3,7 +3,7 @@ module Request.DecodeCurrentWorkout exposing (..)
 import Data.Workout exposing (emptySet)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
-import Request.Exercises exposing (workoutNameDecoder)
+import Request.Exercises exposing (exerciseDecoder, workoutNameDecoder)
 import Types exposing (..)
 
 
@@ -12,7 +12,7 @@ workoutDecoder =
     decode Workout
         |> required "workoutName" workoutNameDecoder
         |> required "exercises" (dict exerciseProgressDecoder)
-        |> required "currentExercise" (nullable string)
+        |> required "currentExercise" (nullable exerciseDecoder)
         |> required "users" (list userDecoder)
         |> hardcoded NotSubmitted
 
@@ -20,7 +20,7 @@ workoutDecoder =
 exerciseProgressDecoder : Decoder ExerciseProgress
 exerciseProgressDecoder =
     decode ExerciseProgress
-        |> hardcoded ""
+        |> required "exercise" exerciseDecoder
         |> required "sets" (list recordedSetDecoder)
         |> required "complete" bool
         |> hardcoded emptySet
@@ -57,18 +57,3 @@ userFromString userStr =
 
         _ ->
             fail "unrecognized user"
-
-
-
--- {
---   "workoutName": "push",
---   "currentExercise": null,
---   "exercises": {
---     "abc123": {
---       "complete": false,
---       "exercises": [
---         { "reps": 12, "weight": 10, user: "Rob" }
---       ]
---     }
---   }
--- }

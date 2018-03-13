@@ -22,7 +22,7 @@ type Msg
     = SetView View
     | StartWorkout WorkoutName
     | ConfirmExercises
-    | StartExercise String
+    | StartExercise Exercise
     | InputWeight String
     | InputReps String
     | SetCurrentUser User
@@ -62,7 +62,8 @@ type alias AllExercises =
 
 
 type alias Exercise =
-    { name : String
+    { id : String
+    , name : String
     , workoutName : WorkoutName
     }
 
@@ -70,7 +71,7 @@ type alias Exercise =
 type alias Workout =
     { workoutName : WorkoutName
     , progress : WorkoutProgress
-    , currentExercise : Maybe String
+    , currentExercise : Maybe Exercise
     , users : List User
     , submitted : SubmitWorkoutStatus
     }
@@ -81,7 +82,7 @@ type alias WorkoutProgress =
 
 
 type alias ExerciseProgress =
-    { name : String
+    { exercise : Exercise
     , sets : List RecordedSet
     , complete : Bool
     , currentSet : CurrentSet

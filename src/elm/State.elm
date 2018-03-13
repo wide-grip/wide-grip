@@ -43,9 +43,9 @@ update msg model =
         ConfirmExercises ->
             setView StartAnExercise model ! []
 
-        StartExercise id ->
+        StartExercise exercise ->
             (model
-                |> updateCurrentWorkout (updateCurrentExercise id)
+                |> updateCurrentWorkout (updateCurrentExercise exercise)
                 |> setView RecordSet
             )
                 ! []
@@ -67,11 +67,13 @@ update msg model =
                 newModel ! [ handleCacheWorkout newModel ]
 
         FinishCurrentExercise ->
-            (model
-                |> updateCurrentWorkout handleFinishSet
-                |> setView StartAnExercise
-            )
-                ! []
+            let
+                newModel =
+                    model
+                        |> updateCurrentWorkout handleFinishSet
+                        |> setView StartAnExercise
+            in
+                newModel ! [ handleCacheWorkout newModel ]
 
         ReceiveExercises val ->
             { model | exercises = decodeExercises val } ! []
@@ -92,11 +94,21 @@ handleRestoreCurrentWorkoutFromCache workoutValue model =
         Ok workout ->
             { model
                 | currentWorkout = Just workout
-                , view = RecordSet
+                , view = viewFromCachedWorkout workout
             }
 
         Err _ ->
             model
+
+
+viewFromCachedWorkout : Workout -> View
+viewFromCachedWorkout workout =
+    case workout.currentExercise of
+        Just _ ->
+            RecordSet
+
+        Nothing ->
+            StartAnExercise
 
 
 setView : View -> Model -> Model

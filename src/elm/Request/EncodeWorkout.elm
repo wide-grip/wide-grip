@@ -20,34 +20,44 @@ encodeWorkout today workout =
             object
                 [ ( "date", float <| Date.toTime today )
                 , ( "workoutName", string <| toString workout.workoutName )
-                , ( "currentExercise", currentExerciseEncoder workout.currentExercise )
+                , ( "currentExercise", encodeCurrentExercise workout.currentExercise )
                 , ( "users", list <| List.map (toString >> string) workout.users )
                 , ( "exercises", object <| encodeAllExercises workout )
                 ]
 
 
-currentExerciseEncoder : Maybe String -> Value
-currentExerciseEncoder currentExercise =
+encodeCurrentExercise : Maybe Exercise -> Value
+encodeCurrentExercise currentExercise =
     currentExercise
-        |> Maybe.map string
+        |> Maybe.map encodeExercise
         |> Maybe.withDefault null
 
 
 encodeAllExercises : Workout -> List ( String, Value )
 encodeAllExercises workout =
     workout.progress
-        |> Dict.map encodeExercise
+        |> Dict.map encodeExerciseProgress
         |> Dict.values
 
 
-encodeExercise : String -> ExerciseProgress -> ( String, Value )
-encodeExercise exerciseId progress =
+encodeExerciseProgress : String -> ExerciseProgress -> ( String, Value )
+encodeExerciseProgress exerciseId progress =
     ( exerciseId
     , object
         [ ( "complete", bool progress.complete )
         , ( "sets", list <| List.map (encodeRecordedSet) progress.sets )
+        , ( "exercise", encodeExercise progress.exercise )
         ]
     )
+
+
+encodeExercise : Exercise -> Value
+encodeExercise ex =
+    object
+        [ ( "id", string ex.id )
+        , ( "name", string ex.name )
+        , ( "workoutName", string <| toString ex.workoutName )
+        ]
 
 
 encodeRecordedSet : RecordedSet -> Value
