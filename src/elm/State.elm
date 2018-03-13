@@ -46,6 +46,7 @@ update msg model =
         StartExercise exercise ->
             (model
                 |> updateCurrentWorkout (updateCurrentExercise exercise)
+                |> updateCurrentWorkout (updateCurrentExerciseWith setCompleteToFalse)
                 |> setView RecordSet
             )
                 ! []

@@ -37,10 +37,7 @@ renderExercise id progress =
 
 handleStart : String -> ExerciseProgress -> Attribute Msg
 handleStart id progress =
-    if not progress.complete then
-        onClick <| StartExercise progress.exercise
-    else
-        emptyProperty
+    onClick <| StartExercise progress.exercise
 
 
 renderIcon : ExerciseProgress -> Html msg

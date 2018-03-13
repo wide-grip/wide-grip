@@ -78,6 +78,11 @@ updateCurrentExerciseWith f workout =
     { workout | progress = updateCurrentExerciseWith_ f workout.currentExercise workout.progress }
 
 
+setCompleteToFalse : ExerciseProgress -> ExerciseProgress
+setCompleteToFalse exerciseProgress =
+    { exerciseProgress | complete = False }
+
+
 updateCurrentExerciseWith_ :
     (ExerciseProgress -> ExerciseProgress)
     -> Maybe Exercise
