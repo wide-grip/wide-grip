@@ -3,8 +3,9 @@ module State exposing (..)
 import Data.Ports exposing (..)
 import Data.Workout exposing (..)
 import Date
-import Json.Cache.Decode exposing (decodeExercises, workoutDecoder)
-import Json.Cache.Encode exposing (encodeCurrentWorkout)
+import Json.Cache.Decode as DecodeCache
+import Json.Cache.Encode as EncodeCache
+import Json.Firebase.Encode as EncodeFirebase
 import Json.Decode exposing (Value, decodeValue)
 import Types exposing (..)
 
@@ -75,7 +76,7 @@ update msg model =
                 newModel ! [ handleCacheWorkout newModel ]
 
         ReceiveExercises val ->
-            { model | exercises = decodeExercises val } ! []
+            { model | exercises = DecodeCache.decodeExercises val } ! []
 
         SubmitWorkout ->
             model ! [ handleSubmitWorkout model ]
@@ -89,7 +90,7 @@ update msg model =
 
 handleRestoreCurrentWorkoutFromCache : Value -> Model -> Model
 handleRestoreCurrentWorkoutFromCache workoutValue model =
-    case decodeValue workoutDecoder workoutValue of
+    case decodeValue DecodeCache.workoutDecoder workoutValue of
         Ok workout ->
             { model
                 | currentWorkout = Just workout
@@ -117,14 +118,14 @@ setView view model =
 
 handleCacheWorkout : Model -> Cmd Msg
 handleCacheWorkout model =
-    encodeCurrentWorkout model
+    EncodeCache.encodeCurrentWorkout model
         |> Maybe.map cacheCurrentWorkout
         |> Maybe.withDefault Cmd.none
 
 
 handleSubmitWorkout : Model -> Cmd Msg
 handleSubmitWorkout model =
-    encodeCurrentWorkout model
+    EncodeFirebase.encodeCurrentWorkout model
         |> Maybe.map submitWorkout
         |> Maybe.withDefault Cmd.none
 
