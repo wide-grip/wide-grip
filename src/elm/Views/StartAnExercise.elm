@@ -1,7 +1,7 @@
 module Views.StartAnExercise exposing (..)
 
 import Data.Workout exposing (currentExercises)
-import Helpers.Html exposing (emptyProperty, renderDict)
+import Helpers.Html exposing (emptyProperty, renderDict, renderDictValues)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -21,26 +21,23 @@ view model =
 
 createExerciseList : Maybe Workout -> List (Html Msg)
 createExerciseList =
-    renderDict renderExercise << currentExercises
+    renderDictValues renderExercise << currentExercises
 
 
-renderExercise : String -> ExerciseProgress -> Html Msg
-renderExercise id progress =
+renderExercise : ExerciseProgress -> Html Msg
+renderExercise progress =
     div
         [ class "flex pointer justify-between mb3 bg-animate hover-bg-navy hover-white items-center br-pill ba b--navy"
-        , handleStart id progress
+        , handleStart progress
         ]
         [ p [ class "ttu ma3 tracked" ] [ text progress.exercise.name ]
         , div [ class "ma3" ] [ renderIcon progress ]
         ]
 
 
-handleStart : String -> ExerciseProgress -> Attribute Msg
-handleStart id progress =
-    if not progress.complete then
-        onClick <| StartExercise progress.exercise
-    else
-        emptyProperty
+handleStart : ExerciseProgress -> Attribute Msg
+handleStart progress =
+    onClick <| StartExercise progress.exercise
 
 
 renderIcon : ExerciseProgress -> Html msg
