@@ -3,10 +3,9 @@ module State exposing (..)
 import Data.Ports exposing (..)
 import Data.Workout exposing (..)
 import Date
+import Json.Cache.Decode exposing (decodeExercises, workoutDecoder)
+import Json.Cache.Encode exposing (encodeCurrentWorkout)
 import Json.Decode exposing (Value, decodeValue)
-import Request.DecodeCurrentWorkout exposing (workoutDecoder)
-import Request.EncodeWorkout exposing (encodeCurrentWorkout)
-import Request.Exercises exposing (decodeExercises)
 import Types exposing (..)
 
 

@@ -1,4 +1,4 @@
-module Request.EncodeWorkout exposing (..)
+module Json.Cache.Encode exposing (..)
 
 import Date exposing (Date)
 import Dict
