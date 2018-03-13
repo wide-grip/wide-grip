@@ -25,27 +25,27 @@ createExerciseList =
 
 
 renderExercise : String -> ExerciseProgress -> Html Msg
-renderExercise id exercise =
+renderExercise id progress =
     div
         [ class "flex pointer justify-between mb3 bg-animate hover-bg-navy hover-white items-center br-pill ba b--navy"
-        , handleStart id exercise
+        , handleStart id progress
         ]
-        [ p [ class "ttu ma3 tracked" ] [ text exercise.name ]
-        , div [ class "ma3" ] [ renderIcon exercise ]
+        [ p [ class "ttu ma3 tracked" ] [ text progress.exercise.name ]
+        , div [ class "ma3" ] [ renderIcon progress ]
         ]
 
 
 handleStart : String -> ExerciseProgress -> Attribute Msg
-handleStart id exercise =
-    if not exercise.complete then
-        onClick <| StartExercise id
+handleStart id progress =
+    if not progress.complete then
+        onClick <| StartExercise progress.exercise
     else
         emptyProperty
 
 
 renderIcon : ExerciseProgress -> Html msg
-renderIcon exercise =
-    if exercise.complete then
+renderIcon progress =
+    if progress.complete then
         tick
     else
         fist

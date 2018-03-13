@@ -3,8 +3,10 @@ module State exposing (..)
 import Data.Ports exposing (..)
 import Data.Workout exposing (..)
 import Date
-import Request.EncodeWorkout exposing (encodeCurrentWorkout)
-import Request.Exercises exposing (decodeExercises)
+import Json.Cache.Decode as DecodeCache
+import Json.Cache.Encode as EncodeCache
+import Json.Firebase.Encode as EncodeFirebase
+import Json.Decode exposing (Value, decodeValue)
 import Types exposing (..)
 
 
@@ -41,9 +43,9 @@ update msg model =
         ConfirmExercises ->
             setView StartAnExercise model ! []
 
-        StartExercise id ->
+        StartExercise exercise ->
             (model
-                |> updateCurrentWorkout (updateCurrentExercise id)
+                |> updateCurrentWorkout (updateCurrentExercise exercise)
                 |> setView RecordSet
             )
                 ! []
@@ -58,17 +60,23 @@ update msg model =
             updateCurrentWorkout (updateCurrentUser user) model ! []
 
         SubmitSet ->
-            updateCurrentWorkout handleSubmitSet model ! []
+            let
+                newModel =
+                    updateCurrentWorkout handleSubmitSet model
+            in
+                newModel ! [ handleCacheWorkout newModel ]
 
         FinishCurrentExercise ->
-            (model
-                |> updateCurrentWorkout handleFinishSet
-                |> setView StartAnExercise
-            )
-                ! []
+            let
+                newModel =
+                    model
+                        |> updateCurrentWorkout handleFinishSet
+                        |> setView StartAnExercise
+            in
+                newModel ! [ handleCacheWorkout newModel ]
 
         ReceiveExercises val ->
-            { model | exercises = decodeExercises val } ! []
+            { model | exercises = DecodeCache.decodeExercises val } ! []
 
         SubmitWorkout ->
             model ! [ handleSubmitWorkout model ]
@@ -76,15 +84,48 @@ update msg model =
         ReceiveSubmitWorkoutStatus message ->
             handleSubmitWorkoutStatus message model ! []
 
+        ReceiveCachedCurrentWorkoutState val ->
+            handleRestoreCurrentWorkoutFromCache val model ! []
+
+
+handleRestoreCurrentWorkoutFromCache : Value -> Model -> Model
+handleRestoreCurrentWorkoutFromCache workoutValue model =
+    case decodeValue DecodeCache.workoutDecoder workoutValue of
+        Ok workout ->
+            { model
+                | currentWorkout = Just workout
+                , view = viewFromCachedWorkout workout
+            }
+
+        Err _ ->
+            model
+
+
+viewFromCachedWorkout : Workout -> View
+viewFromCachedWorkout workout =
+    case workout.currentExercise of
+        Just _ ->
+            RecordSet
+
+        Nothing ->
+            StartAnExercise
+
 
 setView : View -> Model -> Model
 setView view model =
     { model | view = view }
 
 
+handleCacheWorkout : Model -> Cmd Msg
+handleCacheWorkout model =
+    EncodeCache.encodeCurrentWorkout model
+        |> Maybe.map cacheCurrentWorkout
+        |> Maybe.withDefault Cmd.none
+
+
 handleSubmitWorkout : Model -> Cmd Msg
 handleSubmitWorkout model =
-    encodeCurrentWorkout model
+    EncodeFirebase.encodeCurrentWorkout model
         |> Maybe.map submitWorkout
         |> Maybe.withDefault Cmd.none
 
@@ -152,4 +193,5 @@ subscriptions model =
     Sub.batch
         [ receiveExercises ReceiveExercises
         , receiveSubmitWorkoutStatus ReceiveSubmitWorkoutStatus
+        , receiveCurrentWorkoutState ReceiveCachedCurrentWorkoutState
         ]

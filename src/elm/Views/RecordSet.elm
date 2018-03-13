@@ -13,7 +13,7 @@ view : Model -> Html Msg
 view model =
     div [ class "tc" ]
         [ wideGripHeader "track workout"
-        , h2 [ class "mt0 mb4 ttu f4 sans-serif tracked-mega" ] [ text <| exerciseName model.currentWorkout ]
+        , h2 [ class "mt0 mb4 ttu f4 sans-serif tracked-mega" ] [ text <| renderCurrentExerciseName model.currentWorkout ]
         , div [ class "mv4" ] <| List.map (user model) <| currentUsers model.currentWorkout
         , div [ class "f4 tracked flex flex-wrap mw6 center" ]
             [ div [ class "w-100 w-50-ns" ]
@@ -80,16 +80,16 @@ isCurrentUser user workout =
         |> Maybe.withDefault False
 
 
+renderCurrentExerciseName : Maybe Workout -> String
+renderCurrentExerciseName currentWorkout =
+    currentWorkout
+        |> Maybe.andThen currentExerciseName
+        |> Maybe.withDefault ""
+
+
 currentUsers : Maybe Workout -> List User
 currentUsers =
     Maybe.map .users >> Maybe.withDefault []
-
-
-exerciseName : Maybe Workout -> String
-exerciseName workout =
-    workout
-        |> Maybe.andThen currentExerciseName
-        |> Maybe.withDefault ""
 
 
 currentRepsInputValue : Maybe Workout -> String

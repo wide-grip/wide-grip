@@ -21,5 +21,5 @@ view model =
 
 
 renderExercise : ExerciseProgress -> Html Msg
-renderExercise exercise =
-    p [ class "mv4 ttu tracked" ] [ text exercise.name ]
+renderExercise progress =
+    p [ class "mv4 ttu tracked" ] [ text progress.exercise.name ]

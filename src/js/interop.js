@@ -1,9 +1,5 @@
-import {
-  successMessage,
-  errorMessage,
-  getExercises,
-  submitWorkout
-} from './firebase.js'
+import * as firebase from './firebase.js'
+import * as localStorage from './localstorage.js'
 
 export function init(elmApp, db) {
 
@@ -14,8 +10,9 @@ export function init(elmApp, db) {
   function attachPorts () {
     return Promise.resolve()
       .then(subscribeSubmitWorkout)
-      .then(() => getExercises(db))
-      .then(sendExercisesToIncomingPort)
+      .then(handleGetExercises)
+      .then(subscribeCacheCurrentWorkout)
+      .then(restoreCurrentWorkoutState)
   }
 
   function subscribeSubmitWorkout () {
@@ -24,15 +21,45 @@ export function init(elmApp, db) {
 
   function sendSubmitWorkoutStatuses (workoutData) {
     var submitPort = ports.receiveSubmitWorkoutStatus
-    var success    = successMessage()
-    var error      = errorMessage("could not submit workout")
+    var success    = firebase.successMessage()
+    var error      = firebase.errorMessage("could not submit workout")
 
-    return submitWorkout(db, workoutData)
+    return firebase.submitWorkout(db, workoutData)
       .then(() => submitPort.send(success))
+      .then(() => localStorage.removeCurrentWorkout())
       .catch(() => submitPort.send(error))
   }
 
   function sendExercisesToIncomingPort (exercises) {
     ports.receiveExercises.send(exercises)
+  }
+
+  function handleGetExercises () {
+    const exercises = localStorage.getExercises()
+    if (exercises) {
+      sendExercisesToIncomingPort(exercises)
+      refreshExerciseCache()
+    } else {
+      refreshExerciseCache()
+    }
+  }
+
+  function refreshExerciseCache () {
+    firebase.getExercises(db)
+      .then(exercises => {
+        localStorage.setExercises(exercises)
+        sendExercisesToIncomingPort(exercises)
+      })
+  }
+
+  function subscribeCacheCurrentWorkout () {
+    ports.cacheCurrentWorkout.subscribe(currentWorkout => localStorage.setCurrentWorkout(currentWorkout))
+  }
+
+  function restoreCurrentWorkoutState () {
+    const currentWorkout = localStorage.getCurrentWorkout()
+    if (currentWorkout) {
+      ports.receiveCurrentWorkoutState.send(currentWorkout)
+    }
   }
 }

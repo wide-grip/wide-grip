@@ -23,7 +23,7 @@ defaultExercises workoutName users allExercises =
 
 initExerciseProgress : List User -> String -> Exercise -> ExerciseProgress
 initExerciseProgress users _ exercise =
-    { name = exercise.name
+    { exercise = exercise
     , sets = []
     , complete = False
     , currentSet = emptySet
@@ -33,7 +33,7 @@ initExerciseProgress users _ exercise =
 
 currentUser : Workout -> Maybe User
 currentUser =
-    currentExercise >> Maybe.map .currentUser
+    currentExerciseProgress >> Maybe.map .currentUser
 
 
 emptySet : ( Result String Int, Result String Int )
@@ -48,9 +48,14 @@ currentExercises =
     Maybe.map .progress >> Maybe.withDefault Dict.empty
 
 
+resetCurrentExercise : Workout -> Workout
+resetCurrentExercise workout =
+    { workout | currentExercise = Nothing }
+
+
 handleFinishSet : Workout -> Workout
 handleFinishSet =
-    updateCurrentExerciseWith finishSet
+    updateCurrentExerciseWith finishSet >> resetCurrentExercise
 
 
 updateCurrentUser : User -> Workout -> Workout
@@ -75,12 +80,12 @@ updateCurrentExerciseWith f workout =
 
 updateCurrentExerciseWith_ :
     (ExerciseProgress -> ExerciseProgress)
-    -> Maybe String
+    -> Maybe Exercise
     -> WorkoutProgress
     -> WorkoutProgress
-updateCurrentExerciseWith_ f exerciseId exercises =
-    exerciseId
-        |> Maybe.map (\id -> Dict.update id (Maybe.map f) exercises)
+updateCurrentExerciseWith_ f currentExercise exercises =
+    currentExercise
+        |> Maybe.map (\ex -> Dict.update ex.id (Maybe.map f) exercises)
         |> Maybe.withDefault exercises
 
 
@@ -109,9 +114,9 @@ updateReps repStr ( weight, _ ) =
     ( weight, String.toInt repStr )
 
 
-updateCurrentExercise : String -> Workout -> Workout
-updateCurrentExercise exerciseId workout =
-    { workout | currentExercise = Just exerciseId }
+updateCurrentExercise : Exercise -> Workout -> Workout
+updateCurrentExercise exercise workout =
+    { workout | currentExercise = Just exercise }
 
 
 submitSet : ExerciseProgress -> ExerciseProgress
@@ -158,14 +163,16 @@ validInputSet currentSet =
 
 currentExerciseName : Workout -> Maybe String
 currentExerciseName =
-    currentExercise >> Maybe.map .name
+    currentExerciseProgress >> Maybe.map (.exercise >> .name)
 
 
 currentSet : Workout -> Maybe CurrentSet
 currentSet =
-    currentExercise >> Maybe.map .currentSet
+    currentExerciseProgress >> Maybe.map .currentSet
 
 
-currentExercise : Workout -> Maybe ExerciseProgress
-currentExercise workout =
-    workout.currentExercise |> Maybe.andThen (\exerciseId -> Dict.get exerciseId workout.progress)
+currentExerciseProgress : Workout -> Maybe ExerciseProgress
+currentExerciseProgress workout =
+    workout.currentExercise
+        |> Maybe.map .id
+        |> Maybe.andThen (\exerciseId -> Dict.get exerciseId workout.progress)

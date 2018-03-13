@@ -1,7 +1,7 @@
-module Request.EncodeWorkout exposing (..)
+module Json.Firebase.Encode exposing (..)
 
 import Date exposing (Date)
-import Dict
+import Dict exposing (Dict)
 import Json.Encode exposing (..)
 import Types exposing (..)
 
@@ -41,8 +41,8 @@ nonEmptyExercise progress =
 
 
 encodeExercise : String -> ExerciseProgress -> List Value
-encodeExercise exerciseId progress =
-    List.map (encodeRecordedSet exerciseId) progress.sets
+encodeExercise exerciseId exerciseProgress =
+    List.map (encodeRecordedSet exerciseId) exerciseProgress.sets
 
 
 encodeRecordedSet : String -> RecordedSet -> Value
