@@ -1,23 +1,16 @@
-module Json.Cache.Encode exposing
+module Cache.Encode exposing
     ( encodeAllExercises
     , encodeCurrentExercise
-    , encodeCurrentWorkout
     , encodeExercise
     , encodeExerciseProgress
     , encodeRecordedSet
     , encodeWorkout
     )
 
-import Data.Workout exposing (workoutNameToString)
 import Dict
 import Json.Encode exposing (..)
 import Time
-import Types exposing (..)
-
-
-encodeCurrentWorkout : Model -> Maybe Value
-encodeCurrentWorkout model =
-    model.currentWorkout |> Maybe.andThen (encodeWorkout model.today)
+import Workout exposing (..)
 
 
 encodeWorkout : Time.Posix -> Workout -> Maybe Value

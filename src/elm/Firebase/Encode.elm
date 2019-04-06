@@ -1,34 +1,22 @@
-module Json.Firebase.Encode exposing
-    ( encodeCurrentWorkout
-    , encodeExercise
-    , encodeRecordedSet
-    , encodeWorkout
-    , nonEmptyExercise
-    )
+module Firebase.Encode exposing (workout)
 
-import Data.Workout exposing (workoutNameToString)
 import Dict exposing (Dict)
 import Json.Encode exposing (..)
 import Time
-import Types exposing (..)
+import Workout exposing (..)
 
 
-encodeCurrentWorkout : Model -> Maybe Value
-encodeCurrentWorkout model =
-    Maybe.andThen (encodeWorkout model.today) model.currentWorkout
-
-
-encodeWorkout : Time.Posix -> Workout -> Maybe Value
-encodeWorkout today workout =
-    if List.isEmpty <| allExercises workout then
+workout : Time.Posix -> Workout -> Maybe Value
+workout today workout_ =
+    if List.isEmpty <| allExercises workout_ then
         Nothing
 
     else
         Just <|
             object
                 [ ( "date", int <| Time.posixToMillis today )
-                , ( "workoutName", string <| workoutNameToString workout.workoutName )
-                , ( "exercises", list encodeExercise <| allExercises workout )
+                , ( "workoutName", string <| workoutNameToString workout_.workoutName )
+                , ( "exercises", list encodeExercise <| allExercises workout_ )
                 ]
 
 

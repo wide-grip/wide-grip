@@ -1,5 +1,15 @@
-module Data.Workout exposing
-    ( appendSet
+module Workout exposing
+    ( AllExercises
+    , CurrentSet
+    , Exercise
+    , ExerciseProgress
+    , FirebaseMessage
+    , RecordedSet
+    , SubmitWorkoutStatus(..)
+    , Workout
+    , WorkoutName(..)
+    , WorkoutProgress
+    , appendSet
     , currentExerciseName
     , currentExerciseProgress
     , currentExercises
@@ -30,7 +40,68 @@ module Data.Workout exposing
     )
 
 import Dict exposing (Dict)
-import Types exposing (..)
+
+
+type WorkoutName
+    = Push
+    | Pull
+    | Legs
+
+
+type alias AllExercises =
+    Dict String Exercise
+
+
+type alias Exercise =
+    { id : String
+    , name : String
+    , workoutName : WorkoutName
+    }
+
+
+type alias Workout =
+    { workoutName : WorkoutName
+    , progress : WorkoutProgress
+    , currentExercise : Maybe Exercise
+    , users : List String
+    , submitted : SubmitWorkoutStatus
+    }
+
+
+type alias WorkoutProgress =
+    Dict String ExerciseProgress
+
+
+type alias ExerciseProgress =
+    { exercise : Exercise
+    , sets : List RecordedSet
+    , complete : Bool
+    , currentSet : CurrentSet
+    , currentUser : String
+    }
+
+
+type alias RecordedSet =
+    { user : String
+    , weight : Int
+    , reps : Int
+    }
+
+
+type alias CurrentSet =
+    ( Maybe Int, Maybe Int )
+
+
+type alias FirebaseMessage =
+    { success : Bool
+    , reason : String
+    }
+
+
+type SubmitWorkoutStatus
+    = NotSubmitted
+    | Success
+    | Failure String
 
 
 workoutNameToString : WorkoutName -> String

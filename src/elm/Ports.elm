@@ -7,7 +7,7 @@ port module Ports exposing
     )
 
 import Json.Decode exposing (Value)
-import Types exposing (FirebaseMessage)
+import Workout exposing (FirebaseMessage)
 
 
 port receiveExercises : (Value -> msg) -> Sub msg

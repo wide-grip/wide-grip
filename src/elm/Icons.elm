@@ -1,23 +1,30 @@
-module Views.Icon exposing (ButtonStyle(..), fist, fistButton, fistButtonColors, fistButtonDisabled, fistButtonInverse, fistButton_, smallIcon, tick, wideGripHeader)
+module Icons exposing
+    ( fist
+    , fistButton
+    , fistButtonDisabled
+    , fistButtonInverse
+    , tick
+    , wideGripHeader
+    )
 
-import Helpers.Style exposing (backgroundImage, classes, heightStyle, widthStyle)
+import Helpers.Style exposing (backgroundImage, classes, height, width)
 import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (class, style)
 
 
 wideGripHeader : String -> Html msg
 wideGripHeader title =
     div [ class "tc center mb5 relative" ]
         [ div
-            [ (\( a, b ) -> style a b) (backgroundImage "img/wide-grip-logo.png")
-            , (\( a, b ) -> style a b) (heightStyle 100)
+            [ backgroundImage "img/wide-grip-logo.png"
+            , height 100
             , class "bg-center contain mw6 center relative z-1"
             ]
             []
         , div
             [ class "bg-navy absolute w-100 z-0 dn db-ns"
             , style "top" "42px"
-            , (\( a, b ) -> style a b) (heightStyle 14)
+            , height 14
             ]
             []
         , h1 [ class "mt0 ttu tracked-mega navy" ] [ text title ]
@@ -88,9 +95,9 @@ fist =
 smallIcon : String -> Html msg
 smallIcon imgSrc =
     div
-        [ (\( a, b ) -> style a b) (widthStyle 25)
-        , (\( a, b ) -> style a b) (heightStyle 25)
-        , (\( a, b ) -> style a b) (backgroundImage imgSrc)
+        [ width 25
+        , height 25
+        , backgroundImage imgSrc
         , class "bg-center contain"
         ]
         []

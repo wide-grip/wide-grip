@@ -1,4 +1,4 @@
-module Json.Cache.Decode exposing
+module Cache.Decode exposing
     ( RawExercise
     , addIdToExercise
     , decodeExercises
@@ -11,11 +11,10 @@ module Json.Cache.Decode exposing
     , workoutNameFromString
     )
 
-import Data.Workout exposing (emptySet)
 import Dict exposing (Dict)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
-import Types exposing (..)
+import Workout exposing (..)
 
 
 workoutDecoder : Decoder Workout
