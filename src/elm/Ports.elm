@@ -1,25 +1,43 @@
 port module Ports exposing
-    ( cacheCurrentWorkout
-    , receiveCurrentWorkoutState
+    ( cacheExerciseProgress
+    , cacheWorkout
     , receiveExercises
-    , receiveSubmitWorkoutStatus
-    , submitWorkout
+    , receiveWorkoutFromCache
+    , receiveWorkoutInProgress
+    , recevieExerciseProgressFromCache
+    , restoreExerciseProgressFromCache
+    , restoreWorkoutFromCache
+    , workoutInProgress
     )
 
-import Json.Decode exposing (Value)
-import Workout exposing (FirebaseMessage)
+import Json.Encode as Encode
 
 
-port receiveExercises : (Value -> msg) -> Sub msg
+port receiveExercises : (Encode.Value -> msg) -> Sub msg
 
 
-port receiveSubmitWorkoutStatus : (FirebaseMessage -> msg) -> Sub msg
+port cacheWorkout : Encode.Value -> Cmd msg
 
 
-port receiveCurrentWorkoutState : (Value -> msg) -> Sub msg
+port cacheExercise : Encode.Value -> Cmd msg
 
 
-port submitWorkout : Value -> Cmd msg
+port restoreExerciseProgressFromCache : String -> Cmd msg
 
 
-port cacheCurrentWorkout : Value -> Cmd msg
+port restoreWorkoutFromCache : () -> Cmd msg
+
+
+port receiveWorkoutFromCache : (Encode.Value -> msg) -> Sub msg
+
+
+port recevieExerciseProgressFromCache : (Encode.Value -> msg) -> Sub msg
+
+
+port cacheExerciseProgress : Encode.Value -> Cmd msg
+
+
+port workoutInProgress : () -> Cmd msg
+
+
+port receiveWorkoutInProgress : (Bool -> msg) -> Sub msg

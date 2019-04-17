@@ -1,19 +1,18 @@
 module Main exposing (main)
 
 import Browser
-import Cache.Decode
-import Cache.Encode
-import Firebase.Encode
-import Helpers.Html exposing (renderDictValues)
-import Helpers.Style exposing (classes)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
-import Icons
-import Json.Decode exposing (Value, decodeValue)
-import Ports exposing (..)
-import Time
-import Workout exposing (..)
+import Browser.Navigation as Navigation
+import Context exposing (Context)
+import Html exposing (Html)
+import Json.Encode as Encode
+import Page.Exercise as Exercise
+import Page.Home as Home
+import Page.SelectWorkout as SelectWorkout
+import Page.Workout as Workout
+import Ports
+import Route exposing (Route)
+import Url
+import Views.Layout as Layout
 
 
 
@@ -22,11 +21,13 @@ import Workout exposing (..)
 
 main : Program Flags Model Msg
 main =
-    Browser.document
+    Browser.application
         { init = init
         , update = update
-        , view = view
         , subscriptions = subscriptions
+        , view = view
+        , onUrlRequest = LinkClicked
+        , onUrlChange = UrlChanged
         }
 
 
@@ -34,61 +35,49 @@ main =
 -- Model
 
 
-type alias Model =
-    { view : View
-    , today : Time.Posix
-    , exercises : Maybe AllExercises
-    , currentWorkout : Maybe Workout
+type alias Flags =
+    { now : Int
+    , exercises : Encode.Value
     }
 
 
-type alias Flags =
-    { now : Int }
+type Model
+    = Home Home.Model
+    | SelectWorkout SelectWorkout.Model
+    | Workout Workout.Model
+    | Exercise Exercise.Model
 
 
 type Msg
-    = SetView View
-    | StartWorkout WorkoutName
-    | ConfirmExercises
-    | StartExercise Exercise
-    | InputWeight String
-    | InputReps String
-    | SetCurrentUser String
-    | SubmitSet
-    | FinishCurrentExercise
-    | ReceiveExercises Value
-    | SubmitWorkout
-    | ReceiveSubmitWorkoutStatus FirebaseMessage
-    | ReceiveCachedCurrentWorkoutState Value
-
-
-type View
-    = Home
-    | History
-    | SelectSession
-    | SelectExercisesForWorkout
-    | StartAnExercise
-    | RecordSet
+    = HomeMsg Home.Msg
+    | ExerciseMsg Exercise.Msg
+    | SelectWorkoutMsg SelectWorkout.Msg
+    | WorkoutMsg Workout.Msg
+    | AllExercises Encode.Value
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
 
 
 
 -- Init
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
-    ( initialModel flags
-    , Cmd.none
-    )
+init : Flags -> Url.Url -> Navigation.Key -> ( Model, Cmd Msg )
+init flags url key =
+    emptyPage key flags |> changeRouteTo (Route.fromUrl url)
 
 
-initialModel : Flags -> Model
-initialModel flags =
-    { view = Home
-    , today = Time.millisToPosix flags.now
-    , exercises = Nothing
-    , currentWorkout = Nothing
-    }
+emptyPage : Navigation.Key -> Flags -> Model
+emptyPage key flags =
+    initialContext key flags
+        |> Home.init
+        |> Tuple.first
+        |> Home
+
+
+initialContext : Navigation.Key -> Flags -> Context
+initialContext key flags =
+    Context.empty key flags.now flags.exercises
 
 
 
@@ -97,179 +86,152 @@ initialModel flags =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        SetView currentView ->
-            ( setView currentView model
-            , Cmd.none
-            )
+    case ( msg, model ) of
+        ( HomeMsg msg_, Home model_ ) ->
+            Home.update msg_ model_ |> updateHome
 
-        StartWorkout workoutName ->
-            ( handleStartWorkout workoutName model
-            , Cmd.none
-            )
+        ( ExerciseMsg msg_, Exercise model_ ) ->
+            Exercise.update msg_ model_ |> updateExercise
 
-        ConfirmExercises ->
-            ( setView StartAnExercise model
-            , Cmd.none
-            )
+        ( SelectWorkoutMsg msg_, SelectWorkout model_ ) ->
+            SelectWorkout.update msg_ model_ |> updateSelectWorkout
 
-        StartExercise exercise ->
+        ( WorkoutMsg msg_, Workout model_ ) ->
+            Workout.update msg_ model_ |> updateWorkout
+
+        ( LinkClicked urlRequest, _ ) ->
+            handleLinkClicked model urlRequest
+
+        ( UrlChanged url, _ ) ->
+            changeRouteTo (Route.fromUrl url) model
+
+        ( AllExercises exercises, _ ) ->
+            ( updateContext (Context.updateAllExercises exercises) model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleLinkClicked : Model -> Browser.UrlRequest -> ( Model, Cmd Msg )
+handleLinkClicked model urlRequest =
+    case urlRequest of
+        Browser.Internal url ->
             ( model
-                |> updateCurrentWorkout (updateCurrentExercise exercise)
-                |> updateCurrentWorkout (updateCurrentExerciseWith setCompleteToFalse)
-                |> setView RecordSet
-            , Cmd.none
+            , Navigation.pushUrl (getContext model |> .navKey) (Url.toString url)
             )
 
-        InputWeight weightStr ->
-            ( updateCurrentWorkout (updateInputWeight weightStr) model
-            , Cmd.none
-            )
-
-        InputReps repStr ->
-            ( updateCurrentWorkout (updateInputReps repStr) model
-            , Cmd.none
-            )
-
-        SetCurrentUser user ->
-            ( updateCurrentWorkout (updateCurrentUser user) model
-            , Cmd.none
-            )
-
-        SubmitSet ->
-            updateCurrentWorkout handleSubmitSet model
-                |> withCmd handleCacheWorkout
-
-        FinishCurrentExercise ->
-            model
-                |> updateCurrentWorkout handleFinishSet
-                |> setView StartAnExercise
-                |> withCmd handleCacheWorkout
-
-        ReceiveExercises val ->
-            ( { model | exercises = Result.toMaybe <| Cache.Decode.decodeExercises val }
-            , Cmd.none
-            )
-
-        SubmitWorkout ->
+        Browser.External href ->
             ( model
-            , handleSubmitWorkout model
-            )
-
-        ReceiveSubmitWorkoutStatus message ->
-            ( handleSubmitWorkoutStatus message model
-            , Cmd.none
-            )
-
-        ReceiveCachedCurrentWorkoutState val ->
-            ( handleRestoreCurrentWorkoutFromCache val model
-            , Cmd.none
+            , Navigation.load href
             )
 
 
-withCmd : (Model -> Cmd Msg) -> Model -> ( Model, Cmd Msg )
-withCmd cmdF model =
-    ( model, cmdF model )
+updateHome : ( Home.Model, Cmd Home.Msg ) -> ( Model, Cmd Msg )
+updateHome =
+    updateWith Home HomeMsg
 
 
-handleRestoreCurrentWorkoutFromCache : Value -> Model -> Model
-handleRestoreCurrentWorkoutFromCache workoutValue model =
-    case decodeValue Cache.Decode.workoutDecoder workoutValue of
-        Ok workout ->
-            { model
-                | currentWorkout = Just workout
-                , view = viewFromCachedWorkout workout
-            }
-
-        Err _ ->
-            model
+updateSelectWorkout : ( SelectWorkout.Model, Cmd SelectWorkout.Msg ) -> ( Model, Cmd Msg )
+updateSelectWorkout =
+    updateWith SelectWorkout SelectWorkoutMsg
 
 
-viewFromCachedWorkout : Workout -> View
-viewFromCachedWorkout workout =
-    case workout.currentExercise of
-        Just _ ->
-            RecordSet
-
-        Nothing ->
-            StartAnExercise
+updateExercise : ( Exercise.Model, Cmd Exercise.Msg ) -> ( Model, Cmd Msg )
+updateExercise =
+    updateWith Exercise ExerciseMsg
 
 
-setView : View -> Model -> Model
-setView currentView model =
-    { model | view = currentView }
+updateWorkout : ( Workout.Model, Cmd Workout.Msg ) -> ( Model, Cmd Msg )
+updateWorkout =
+    updateWith Workout WorkoutMsg
 
 
-handleCacheWorkout : Model -> Cmd Msg
-handleCacheWorkout model =
-    model.currentWorkout
-        |> Maybe.andThen (Cache.Encode.encodeWorkout model.today)
-        |> Maybe.map cacheCurrentWorkout
-        |> Maybe.withDefault Cmd.none
+updateWith :
+    (pageModel -> model)
+    -> (pageMsg -> msg)
+    -> ( pageModel, Cmd pageMsg )
+    -> ( model, Cmd msg )
+updateWith modelF msgF ( pageModel, pageCmd ) =
+    ( modelF pageModel
+    , Cmd.map msgF pageCmd
+    )
 
 
-handleSubmitWorkout : Model -> Cmd Msg
-handleSubmitWorkout model =
-    model.currentWorkout
-        |> Maybe.andThen (Cache.Encode.encodeWorkout model.today)
-        |> Maybe.map submitWorkout
-        |> Maybe.withDefault Cmd.none
+
+-- Router
 
 
-handleStartWorkout : WorkoutName -> Model -> Model
-handleStartWorkout workoutName model =
-    case model.exercises of
-        Just allExercises ->
-            { model
-                | currentWorkout = initWorkout workoutName [ "Andrew", "Rob" ] allExercises
-                , view = SelectExercisesForWorkout
-            }
-
-        Nothing ->
-            model
-
-
-handleSubmitWorkoutStatus : FirebaseMessage -> Model -> Model
-handleSubmitWorkoutStatus firebaseMessage model =
+changeRouteTo : Maybe Route.Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo maybeRoute model =
     let
-        submitStatus =
-            messageToSubmitWorkoutStatus firebaseMessage
+        context =
+            getContext model
     in
-    updateCurrentWorkout (\w -> { w | submitted = submitStatus }) model
+    case maybeRoute of
+        Just Route.Home ->
+            Home.init context |> updateHome
+
+        Just Route.SelectWorkout ->
+            SelectWorkout.init context |> updateSelectWorkout
+
+        Just Route.Workout ->
+            Workout.init context |> updateWorkout
+
+        Just (Route.Exercise exerciseId) ->
+            handleExercise context exerciseId
+
+        Nothing ->
+            Home.init context |> updateHome
 
 
-messageToSubmitWorkoutStatus : FirebaseMessage -> SubmitWorkoutStatus
-messageToSubmitWorkoutStatus message =
-    if message.success then
-        Success
+handleExercise : Context -> Maybe String -> ( Model, Cmd Msg )
+handleExercise context exerciseId =
+    case exerciseId of
+        Just id ->
+            Exercise.init context id |> updateExercise
 
-    else
-        Failure message.reason
-
-
-initWorkout : WorkoutName -> List String -> AllExercises -> Maybe Workout
-initWorkout workoutName users allExercises =
-    Just
-        { workoutName = workoutName
-        , progress = defaultExercises workoutName users allExercises
-        , currentExercise = Nothing
-        , users = users
-        , submitted = NotSubmitted
-        }
+        Nothing ->
+            SelectWorkout.init context |> updateSelectWorkout
 
 
-updateCurrentWorkout : (Workout -> Workout) -> Model -> Model
-updateCurrentWorkout f model =
-    { model | currentWorkout = Maybe.map f model.currentWorkout }
+
+-- Context
 
 
-handleSubmitSet : Workout -> Workout
-handleSubmitSet workout =
-    if validSet workout then
-        updateCurrentExerciseWith submitSet workout
+getContext : Model -> Context
+getContext page =
+    case page of
+        Home m ->
+            m.context
 
-    else
-        workout
+        SelectWorkout m ->
+            m.context
+
+        Workout m ->
+            m.context
+
+        Exercise m ->
+            m.context
+
+
+updateContext : (Context -> Context) -> Model -> Model
+updateContext f model =
+    let
+        update_ m =
+            { m | context = f m.context }
+    in
+    case model of
+        Home m ->
+            Home <| update_ m
+
+        SelectWorkout m ->
+            SelectWorkout <| update_ m
+
+        Workout m ->
+            Workout <| update_ m
+
+        Exercise m ->
+            Exercise <| update_ m
 
 
 
@@ -279,10 +241,25 @@ handleSubmitSet workout =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ receiveExercises ReceiveExercises
-        , receiveSubmitWorkoutStatus ReceiveSubmitWorkoutStatus
-        , receiveCurrentWorkoutState ReceiveCachedCurrentWorkoutState
+        [ Ports.receiveExercises AllExercises
+        , pageSubscriptions model
         ]
+
+
+pageSubscriptions : Model -> Sub Msg
+pageSubscriptions page =
+    case page of
+        Home model ->
+            Home.subscriptions model |> Sub.map HomeMsg
+
+        SelectWorkout model ->
+            SelectWorkout.subscriptions model |> Sub.map SelectWorkoutMsg
+
+        Workout model ->
+            Workout.subscriptions model |> Sub.map WorkoutMsg
+
+        Exercise model ->
+            Exercise.subscriptions model |> Sub.map ExerciseMsg
 
 
 
@@ -297,283 +274,20 @@ view model =
 
 
 view_ : Model -> Html Msg
-view_ model =
-    case model.view of
-        Home ->
-            home model
-
-        History ->
-            history
-
-        SelectSession ->
-            selectSession model
-
-        SelectExercisesForWorkout ->
-            selectExercisesForWorkout model
-
-        StartAnExercise ->
-            startAnExercise model
-
-        RecordSet ->
-            recordSet model
-
-
-
--- Home
-
-
-home : Model -> Html Msg
-home model =
-    div [ class "tc tracked-mega ttu" ]
-        [ Icons.wideGripHeader "wide grip"
-        , renderOptions model.exercises
-        ]
-
-
-renderOptions : Maybe AllExercises -> Html Msg
-renderOptions allExercises =
-    case allExercises of
-        Just _ ->
-            div []
-                [ p
-                    [ onClick <| SetView SelectSession
-                    , class "white headline pointer mb4 bg-navy pa4 br-pill mw5 center"
-                    ]
-                    [ text "Track Workout" ]
-                , p
-                    [ onClick <| SetView History
-                    , class "white headline pointer mb4 bg-red pa4 br-pill mw5 center"
-                    ]
-                    [ text "Your Gainz" ]
-                ]
-
-        Nothing ->
-            p [] [ text "Loading..." ]
-
-
-
--- History
-
-
-history =
-    div []
-        [ h1 [] [ text "Previous Workouts" ]
-        ]
-
-
-
--- Select Session
-
-
-selectSession : Model -> Html Msg
-selectSession model =
-    div [ class "tc" ]
-        [ Icons.wideGripHeader "track workout"
-        , selectWorkoutName Push
-        , selectWorkoutName Pull
-        , selectWorkoutName Legs
-        ]
-
-
-selectWorkoutName : WorkoutName -> Html Msg
-selectWorkoutName workoutName =
-    p
-        [ onClick <| StartWorkout workoutName
-        , class "pointer mv4 headline tracked ttu bg-animate hover-bg-navy bg-gray pa3 br-pill white mw5 center"
-        ]
-        [ text <| workoutNameToString workoutName ]
-
-
-
--- Select Exercises for Workout
-
-
-selectExercisesForWorkout : Model -> Html Msg
-selectExercisesForWorkout model =
-    div [ class "tc" ]
-        [ Icons.wideGripHeader "track workout"
-        , div [] <| renderDictValues renderExercise <| currentExercises model.currentWorkout
-        , div [ onClick ConfirmExercises ]
-            [ Icons.fistButton "start"
-            ]
-        ]
-
-
-renderExercise : ExerciseProgress -> Html Msg
-renderExercise progress =
-    p [ class "mv4 ttu tracked" ] [ text progress.exercise.name ]
-
-
-
--- Start an Exercise
-
-
-startAnExercise : Model -> Html Msg
-startAnExercise model =
-    div []
-        [ Icons.wideGripHeader "start an exercise"
-        , div [ class "mt5 mw5 center" ] <| createExerciseList model.currentWorkout
-        , div [ onClick SubmitWorkout, class "center tc" ] [ Icons.fistButton "finish workout" ]
-        , div [ class "tc mt4" ] [ renderCurrentSubmitStatus model.currentWorkout ]
-        ]
-
-
-createExerciseList : Maybe Workout -> List (Html Msg)
-createExerciseList =
-    renderDictValues startExercise << currentExercises
-
-
-startExercise : ExerciseProgress -> Html Msg
-startExercise progress =
-    div
-        [ class "flex pointer justify-between mb3 bg-animate hover-bg-navy hover-white items-center br-pill ba b--navy"
-        , handleStart progress
-        ]
-        [ p [ class "ttu ma3 tracked" ] [ text progress.exercise.name ]
-        , div [ class "ma3" ] [ renderIcon progress ]
-        ]
-
-
-handleStart : ExerciseProgress -> Attribute Msg
-handleStart progress =
-    onClick <| StartExercise progress.exercise
-
-
-renderIcon : ExerciseProgress -> Html msg
-renderIcon progress =
-    if progress.complete then
-        Icons.tick
-
-    else
-        Icons.fist
-
-
-renderCurrentSubmitStatus : Maybe Workout -> Html msg
-renderCurrentSubmitStatus currentWorkout =
-    currentWorkout
-        |> Maybe.map (.submitted >> renderSubmitStatus)
-        |> Maybe.withDefault (span [] [])
-
-
-renderSubmitStatus : SubmitWorkoutStatus -> Html msg
-renderSubmitStatus submitWorkoutStatus =
-    case submitWorkoutStatus of
-        Success ->
-            p [ class "green" ] [ text "Workout Saved!" ]
-
-        Failure _ ->
-            p [ class "red" ] [ text "There was a problem submitting your workout" ]
-
-        _ ->
-            span [] []
-
-
-
--- Record Set
-
-
-recordSet : Model -> Html Msg
-recordSet model =
-    div [ class "tc" ]
-        [ Icons.wideGripHeader "track workout"
-        , h2 [ class "mt0 mb4 ttu f4 sans-serif tracked-mega" ] [ text <| renderCurrentExerciseName model.currentWorkout ]
-        , div [ class "mv4" ] <| List.map (user_ model) <| currentUsers model.currentWorkout
-        , div [ class "f4 tracked flex flex-wrap mw6 center" ]
-            [ div [ class "w-100 w-50-ns" ]
-                [ h4 [ class "ttu sans-serif mv2" ] [ text "Weight" ]
-                , input
-                    [ placeholder "Kg"
-                    , type_ "number"
-                    , class "tc outline-0 center pa2 mb3 w-80 center"
-                    , value <| currentWeightInputValue model.currentWorkout
-                    , onInput InputWeight
-                    ]
-                    []
-                ]
-            , div [ class "w-100 w-50-ns" ]
-                [ h4 [ class "ttu sans-serif mv2" ] [ text "Reps" ]
-                , input
-                    [ placeholder "Reps"
-                    , type_ "number"
-                    , class "tc outline-0 center pa2 mb2 w-80 center"
-                    , value <| currentRepsInputValue model.currentWorkout
-                    , onInput InputReps
-                    ]
-                    []
-                ]
-            ]
-        , nextSetButton model.currentWorkout
-        , div []
-            [ div
-                [ class "dib"
-                , onClick FinishCurrentExercise
-                ]
-                [ Icons.fistButtonInverse "finished" ]
-            ]
-        ]
-
-
-nextSetButton : Maybe Workout -> Html Msg
-nextSetButton workout =
-    case Maybe.map validSet workout of
-        Just True ->
-            div [ onClick SubmitSet ] [ Icons.fistButton "next set" ]
-
-        _ ->
-            Icons.fistButtonDisabled "next set"
-
-
-user_ : Model -> String -> Html Msg
-user_ model u =
-    div
-        [ classes
-            [ "dib ba no-select pointer"
-            , "br-pill"
-            , "ph3 pv2 mh2"
-            , "ttu tracked f6"
-            ]
-        , classList
-            [ ( "bg-navy b--navy white", isCurrentUser u model.currentWorkout )
-            , ( "bg-white b--dark-gray dark-gray", not <| isCurrentUser u model.currentWorkout )
-            ]
-        , onClick <| SetCurrentUser u
-        ]
-        [ text u ]
-
-
-isCurrentUser : String -> Maybe Workout -> Bool
-isCurrentUser u workout =
-    workout
-        |> Maybe.andThen currentUser
-        |> Maybe.map ((==) u)
-        |> Maybe.withDefault False
-
-
-renderCurrentExerciseName : Maybe Workout -> String
-renderCurrentExerciseName currentWorkout =
-    currentWorkout
-        |> Maybe.andThen currentExerciseName
-        |> Maybe.withDefault ""
-
-
-currentUsers : Maybe Workout -> List String
-currentUsers =
-    Maybe.map .users >> Maybe.withDefault []
-
-
-currentRepsInputValue : Maybe Workout -> String
-currentRepsInputValue =
-    currentSetInputValue Tuple.second
-
-
-currentWeightInputValue : Maybe Workout -> String
-currentWeightInputValue =
-    currentSetInputValue Tuple.first
-
-
-currentSetInputValue : (CurrentSet -> Maybe Int) -> Maybe Workout -> String
-currentSetInputValue f currentWorkout =
-    currentWorkout
-        |> Maybe.andThen currentSet
-        |> Maybe.andThen (f >> Maybe.map String.fromInt)
-        |> Maybe.withDefault ""
+view_ page =
+    case page of
+        Home model ->
+            Layout.layout "wide grip"
+                [ Html.map HomeMsg <| Home.view model ]
+
+        SelectWorkout model ->
+            Layout.layout "choose workout"
+                [ Html.map SelectWorkoutMsg <| SelectWorkout.view model ]
+
+        Workout model ->
+            Layout.layout "workout"
+                [ Html.map WorkoutMsg <| Workout.view model ]
+
+        Exercise model ->
+            Layout.layout "exercise"
+                [ Html.map ExerciseMsg <| Exercise.view model ]

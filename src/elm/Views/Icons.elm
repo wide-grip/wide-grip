@@ -1,4 +1,4 @@
-module Icons exposing
+module Views.Icons exposing
     ( fist
     , fistButton
     , fistButtonDisabled
@@ -10,6 +10,7 @@ module Icons exposing
 import Helpers.Style exposing (backgroundImage, classes, height, width)
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
+import Route
 
 
 wideGripHeader : String -> Html msg
@@ -27,7 +28,11 @@ wideGripHeader title =
             , height 14
             ]
             []
-        , h1 [ class "mt0 ttu tracked-mega navy" ] [ text title ]
+        , a
+            [ Route.href Route.Home
+            , class "no-underline"
+            ]
+            [ h1 [ class "mt0 ttu tracked-mega navy" ] [ text title ] ]
         ]
 
 
