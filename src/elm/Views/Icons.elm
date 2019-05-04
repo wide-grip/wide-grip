@@ -1,27 +1,38 @@
-module Views.Icon exposing (..)
+module Views.Icons exposing
+    ( fist
+    , fistButton
+    , fistButtonDisabled
+    , fistButtonInverse
+    , tick
+    , wideGripHeader
+    )
 
-import Helpers.Style exposing (backgroundImage, classes, heightStyle, widthStyle)
+import Helpers.Style exposing (backgroundImage, classes, height, width)
 import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (class, style)
+import Route
 
 
 wideGripHeader : String -> Html msg
 wideGripHeader title =
     div [ class "tc center mb5 relative" ]
         [ div
-            [ style
-                [ backgroundImage "img/wide-grip-logo.png"
-                , heightStyle 100
-                ]
+            [ backgroundImage "img/wide-grip-logo.png"
+            , height 100
             , class "bg-center contain mw6 center relative z-1"
             ]
             []
         , div
             [ class "bg-navy absolute w-100 z-0 dn db-ns"
-            , style [ ( "top", "42px" ), heightStyle 14 ]
+            , style "top" "42px"
+            , height 14
             ]
             []
-        , h1 [ class "mt0 ttu tracked-mega navy" ] [ text title ]
+        , a
+            [ Route.href Route.Home
+            , class "no-underline"
+            ]
+            [ h1 [ class "mt0 ttu tracked-mega navy" ] [ text title ] ]
         ]
 
 
@@ -89,11 +100,9 @@ fist =
 smallIcon : String -> Html msg
 smallIcon imgSrc =
     div
-        [ style
-            [ widthStyle 25
-            , heightStyle 25
-            , backgroundImage imgSrc
-            ]
+        [ width 25
+        , height 25
+        , backgroundImage imgSrc
         , class "bg-center contain"
         ]
         []

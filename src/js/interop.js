@@ -1,65 +1,33 @@
-import * as firebase from './firebase.js'
-import * as localStorage from './localstorage.js'
+import * as cache from "./cache.js";
 
-export function init(elmApp, db) {
+export function Interop(app) {
+  const { ports } = app;
 
-  const { ports } = elmApp
-
-  attachPorts()
-
-  function attachPorts () {
-    return Promise.resolve()
-      .then(subscribeSubmitWorkout)
-      .then(handleGetExercises)
-      .then(subscribeCacheCurrentWorkout)
-      .then(restoreCurrentWorkoutState)
+  function init() {
+    subscribeRestoreWorkout();
+    subscribeCacheWorkout();
+    subscribeWorkoutInProgress();
   }
 
-  function subscribeSubmitWorkout () {
-    ports.submitWorkout.subscribe(sendSubmitWorkoutStatuses)
+  function subscribeRestoreWorkout() {
+    ports.restoreWorkoutFromCache.subscribe(() => {
+      ports.receiveWorkoutFromCache.send(cache.getWorkout());
+    });
   }
 
-  function sendSubmitWorkoutStatuses (workoutData) {
-    var submitPort = ports.receiveSubmitWorkoutStatus
-    var success    = firebase.successMessage()
-    var error      = firebase.errorMessage("could not submit workout")
-
-    return firebase.submitWorkout(db, workoutData)
-      .then(() => submitPort.send(success))
-      .then(() => localStorage.removeCurrentWorkout())
-      .catch(() => submitPort.send(error))
+  function subscribeCacheWorkout() {
+    ports.cacheWorkout.subscribe(workout => {
+      cache.setWorkout(workout);
+    });
   }
 
-  function sendExercisesToIncomingPort (exercises) {
-    ports.receiveExercises.send(exercises)
+  function subscribeWorkoutInProgress() {
+    ports.workoutInProgress.subscribe(() => {
+      cache.getWorkout()
+        ? ports.receiveWorkoutInProgress.send(true)
+        : ports.receiveWorkoutInProgress.send(false);
+    });
   }
 
-  function handleGetExercises () {
-    const exercises = localStorage.getExercises()
-    if (exercises) {
-      sendExercisesToIncomingPort(exercises)
-      refreshExerciseCache()
-    } else {
-      refreshExerciseCache()
-    }
-  }
-
-  function refreshExerciseCache () {
-    firebase.getExercises(db)
-      .then(exercises => {
-        localStorage.setExercises(exercises)
-        sendExercisesToIncomingPort(exercises)
-      })
-  }
-
-  function subscribeCacheCurrentWorkout () {
-    ports.cacheCurrentWorkout.subscribe(currentWorkout => localStorage.setCurrentWorkout(currentWorkout))
-  }
-
-  function restoreCurrentWorkoutState () {
-    const currentWorkout = localStorage.getCurrentWorkout()
-    if (currentWorkout) {
-      ports.receiveCurrentWorkoutState.send(currentWorkout)
-    }
-  }
+  return { init };
 }

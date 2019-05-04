@@ -1,22 +1,22 @@
-module Helpers.Style exposing (..)
+module Helpers.Style exposing (backgroundImage, classes, height, width)
 
 import Html exposing (Attribute)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, style)
 
 
-backgroundImage : String -> ( String, String )
+backgroundImage : String -> Attribute msg
 backgroundImage src =
-    ( "background-image", "url(" ++ src ++ ")" )
+    style "background-image" <| "url(" ++ src ++ ")"
 
 
-widthStyle : number -> ( String, String )
-widthStyle number =
-    ( "width", toString number ++ "px" )
+width : Float -> Attribute msg
+width number =
+    style "width" <| String.fromFloat number ++ "px"
 
 
-heightStyle : number -> ( String, String )
-heightStyle number =
-    ( "height", toString number ++ "px" )
+height : Float -> Attribute msg
+height number =
+    style "height" <| String.fromFloat number ++ "px"
 
 
 classes : List String -> Attribute msg

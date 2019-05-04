@@ -1,14 +1,16 @@
-import { initDB } from './firebase.js'
-import { getUser, setUser } from './localstorage.js'
-import * as interop from './interop.js'
-const { Elm } = window
+import * as cache from "./cache.js";
+import { Interop } from "./interop.js";
+import { exercises } from "../../exercises.json";
+const { Elm } = window;
 
-const app = Elm.Main.fullscreen({
-  now: Date.now()
-})
+cache.setExercises(exercises)
 
-setUser('robertefrancis18@gmail.com', 'wide-grip')
-const { email, password } = getUser()
+const app = Elm.Main.init({
+  flags: {
+    now: Date.now(),
+    exercises: cache.getExercises()
+  }
+});
 
-initDB(email, password)
-  .then(db => interop.init(app, db))
+const interop = Interop(app);
+interop.init();

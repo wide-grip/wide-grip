@@ -1,183 +1,75 @@
-module Data.Workout exposing (..)
-
-import Dict exposing (Dict)
-import Types exposing (..)
-
-
-renderWorkoutName : WorkoutName -> String
-renderWorkoutName workoutName =
-    case workoutName of
-        UserDefined str ->
-            str
-
-        workoutName ->
-            toString workoutName
-
-
-defaultExercises : WorkoutName -> List User -> AllExercises -> WorkoutProgress
-defaultExercises workoutName users allExercises =
-    allExercises
-        |> Dict.filter (\_ v -> v.workoutName == workoutName)
-        |> Dict.map (initExerciseProgress users)
-
-
-initExerciseProgress : List User -> String -> Exercise -> ExerciseProgress
-initExerciseProgress users _ exercise =
-    { exercise = exercise
-    , sets = []
-    , complete = False
-    , currentSet = emptySet
-    , currentUser = List.head users |> Maybe.withDefault Rob
-    }
-
-
-currentUser : Workout -> Maybe User
-currentUser =
-    currentExerciseProgress >> Maybe.map .currentUser
-
-
-emptySet : ( Result String Int, Result String Int )
-emptySet =
-    ( Err "not entered"
-    , Err "not entered"
+module Data.Workout exposing
+    ( Progress
+    , Set
+    , Workout
+    , addSet
+    , completeExercise
+    , empty
+    , fromList
+    , progress
+    , toList
+    , workout
     )
 
-
-currentExercises : Maybe Workout -> WorkoutProgress
-currentExercises =
-    Maybe.map .progress >> Maybe.withDefault Dict.empty
+import Dict exposing (Dict)
 
 
-resetCurrentExercise : Workout -> Workout
-resetCurrentExercise workout =
-    { workout | currentExercise = Nothing }
+type alias Workout =
+    Dict Int Progress
 
 
-handleFinishSet : Workout -> Workout
-handleFinishSet =
-    updateCurrentExerciseWith finishSet >> resetCurrentExercise
-
-
-updateCurrentUser : User -> Workout -> Workout
-updateCurrentUser =
-    updateCurrentExerciseWith << setCurrentUser
-
-
-updateInputReps : String -> Workout -> Workout
-updateInputReps =
-    updateCurrentExerciseWith << updateCurrentSetReps
-
-
-updateInputWeight : String -> Workout -> Workout
-updateInputWeight =
-    updateCurrentExerciseWith << updateCurrentSetWeight
-
-
-updateCurrentExerciseWith : (ExerciseProgress -> ExerciseProgress) -> Workout -> Workout
-updateCurrentExerciseWith f workout =
-    { workout | progress = updateCurrentExerciseWith_ f workout.currentExercise workout.progress }
-
-
-setCompleteToFalse : ExerciseProgress -> ExerciseProgress
-setCompleteToFalse exerciseProgress =
-    { exerciseProgress | complete = False }
-
-
-updateCurrentExerciseWith_ :
-    (ExerciseProgress -> ExerciseProgress)
-    -> Maybe Exercise
-    -> WorkoutProgress
-    -> WorkoutProgress
-updateCurrentExerciseWith_ f currentExercise exercises =
-    currentExercise
-        |> Maybe.map (\ex -> Dict.update ex.id (Maybe.map f) exercises)
-        |> Maybe.withDefault exercises
-
-
-setCurrentUser : User -> ExerciseProgress -> ExerciseProgress
-setCurrentUser user exercise =
-    { exercise | currentUser = user }
-
-
-updateCurrentSetReps : String -> ExerciseProgress -> ExerciseProgress
-updateCurrentSetReps weightStr exercise =
-    { exercise | currentSet = updateReps weightStr exercise.currentSet }
-
-
-updateCurrentSetWeight : String -> ExerciseProgress -> ExerciseProgress
-updateCurrentSetWeight weightStr exercise =
-    { exercise | currentSet = updateWeight weightStr exercise.currentSet }
-
-
-updateWeight : String -> CurrentSet -> CurrentSet
-updateWeight weightStr ( _, reps ) =
-    ( String.toInt weightStr, reps )
-
-
-updateReps : String -> CurrentSet -> CurrentSet
-updateReps repStr ( weight, _ ) =
-    ( weight, String.toInt repStr )
-
-
-updateCurrentExercise : Exercise -> Workout -> Workout
-updateCurrentExercise exercise workout =
-    { workout | currentExercise = Just exercise }
-
-
-submitSet : ExerciseProgress -> ExerciseProgress
-submitSet exercise =
-    { exercise
-        | currentSet = emptySet
-        , sets = appendSet exercise.currentUser exercise.currentSet exercise.sets
+type alias Progress =
+    { exerciseId : Int
+    , complete : Bool
+    , sets : List Set
     }
 
 
-finishSet : ExerciseProgress -> ExerciseProgress
-finishSet exercise =
-    { exercise
-        | currentSet = emptySet
-        , sets = appendSet exercise.currentUser exercise.currentSet exercise.sets
-        , complete = True
+type alias Set =
+    { user : String
+    , weight : Float
+    , reps : Int
     }
 
 
-appendSet : User -> CurrentSet -> List RecordedSet -> List RecordedSet
-appendSet user currentSet sets =
-    case currentSet of
-        ( Ok weight, Ok reps ) ->
-            RecordedSet user weight reps :: sets
 
-        _ ->
-            sets
+-- Construct
 
 
-validSet : Workout -> Bool
-validSet =
-    currentSet >> Maybe.map validInputSet >> Maybe.withDefault False
+empty : Workout
+empty =
+    Dict.empty
 
 
-validInputSet : CurrentSet -> Bool
-validInputSet currentSet =
-    case currentSet of
-        ( Ok _, Ok _ ) ->
-            True
-
-        _ ->
-            False
+toList : Workout -> List Progress
+toList =
+    Dict.values
 
 
-currentExerciseName : Workout -> Maybe String
-currentExerciseName =
-    currentExerciseProgress >> Maybe.map (.exercise >> .name)
+fromList : List Progress -> Workout
+fromList =
+    List.map (\p -> ( p.exerciseId, p )) >> Dict.fromList
 
 
-currentSet : Workout -> Maybe CurrentSet
-currentSet =
-    currentExerciseProgress >> Maybe.map .currentSet
+progress : Int -> Bool -> List Set -> Progress
+progress =
+    Progress
 
 
-currentExerciseProgress : Workout -> Maybe ExerciseProgress
-currentExerciseProgress workout =
-    workout.currentExercise
-        |> Maybe.map .id
-        |> Maybe.andThen (\exerciseId -> Dict.get exerciseId workout.progress)
+workout : List Progress -> Workout
+workout =
+    List.map (\p -> ( p.exerciseId, p )) >> Dict.fromList
+
+
+
+-- Update
+
+
+addSet : Int -> Workout -> Set -> Workout
+addSet id w set =
+    Dict.update id (Maybe.map (\p -> { p | sets = set :: p.sets })) w
+
+
+completeExercise : Int -> Workout -> Workout
+completeExercise id =
+    Dict.update id (Maybe.map (\p -> { p | complete = True }))
