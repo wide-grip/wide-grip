@@ -19,18 +19,6 @@ export function getWorkout() {
   return getItem(Workout);
 }
 
-export function getProgress(exerciseId) {
-  const workout = getWorkout();
-  return workout && workout[exerciseId];
-}
-
-export function setProgress(progress) {
-  const workout = getWorkout();
-  const { exerciseId } = progress;
-  workout[exerciseId] = progress;
-  return setItem(Workout, workout);
-}
-
 export function removeWorkout() {
   return deleteItem(Workout);
 }

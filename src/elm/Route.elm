@@ -11,31 +11,24 @@ import Data.Exercise exposing (..)
 import Html exposing (Attribute)
 import Html.Attributes as Attribute
 import Url
-import Url.Builder exposing (absolute, string)
+import Url.Builder exposing (absolute, int)
 import Url.Parser as Parser exposing ((<?>), Parser, oneOf, s)
 import Url.Parser.Query as Query
 
 
 type Route
     = Home
-    | SelectWorkout
+    | ChooseWorkout
     | Workout
-    | Exercise (Maybe String)
 
 
 parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map Home Parser.top
-        , Parser.map SelectWorkout (s "select-workout")
+        , Parser.map ChooseWorkout (s "select-workout")
         , Parser.map Workout (s "workout")
-        , Parser.map Exercise (s "exercise" <?> parseExerciseId)
         ]
-
-
-parseExerciseId : Query.Parser (Maybe String)
-parseExerciseId =
-    Query.string "id"
 
 
 pushUrl : Navigation.Key -> Route -> Cmd msg
@@ -64,16 +57,8 @@ routeToString route =
         Home ->
             absolute [] []
 
-        SelectWorkout ->
+        ChooseWorkout ->
             absolute [ "select-workout" ] []
 
         Workout ->
             absolute [ "workout" ] []
-
-        Exercise id ->
-            case id of
-                Just id_ ->
-                    absolute [ "exercise" ] [ string "id" id_ ]
-
-                Nothing ->
-                    absolute [ "exercise" ] []

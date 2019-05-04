@@ -1,4 +1,4 @@
-module Page.SelectWorkout exposing
+module Page.ChooseWorkout exposing
     ( Model
     , Msg
     , init
@@ -33,12 +33,12 @@ type alias Model =
 
 
 type View
-    = ChooseWorkout
-    | ChooseExercises
+    = Category
+    | Exercises
 
 
 type Msg
-    = SelectWorkout Exercise.Category
+    = SelectCategory Exercise.Category
     | SelectExercise Exercise.Exercise
 
 
@@ -58,7 +58,7 @@ initialModel context =
     { context = context
     , selectedCategory = Nothing
     , selectedExercises = Exercise.empty
-    , view = ChooseWorkout
+    , view = Category
     }
 
 
@@ -69,11 +69,11 @@ initialModel context =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SelectWorkout category ->
+        SelectCategory category ->
             { model
                 | selectedCategory = Just category
                 , selectedExercises = Exercise.filterByCategory category model.context.exercises
-                , view = ChooseExercises
+                , view = Exercises
             }
                 |> withCmd cacheWorkout
 
@@ -106,7 +106,7 @@ cacheWorkout =
         >> Ports.cacheWorkout
 
 
-toEmptyWorkout : List String -> Workout.Workout
+toEmptyWorkout : List Int -> Workout.Workout
 toEmptyWorkout =
     List.map (\id -> Workout.progress id False []) >> Workout.workout
 
@@ -134,15 +134,15 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     case model.view of
-        ChooseWorkout ->
-            chooseWorkout model
+        Category ->
+            chooseCategory model
 
-        ChooseExercises ->
+        Exercises ->
             chooseExercises model
 
 
-chooseWorkout : Model -> Html Msg
-chooseWorkout model =
+chooseCategory : Model -> Html Msg
+chooseCategory model =
     div []
         [ selectCategory Exercise.Push
         , selectCategory Exercise.Pull
@@ -153,7 +153,7 @@ chooseWorkout model =
 selectCategory : Exercise.Category -> Html Msg
 selectCategory category =
     p
-        [ onClick <| SelectWorkout category
+        [ onClick <| SelectCategory category
         , class "pointer mv4 headline tracked ttu bg-animate hover-bg-navy bg-gray pa3 br-pill white mw5 center"
         ]
         [ text <| Exercise.categoryToString category ]

@@ -5,9 +5,8 @@ import Browser.Navigation as Navigation
 import Context exposing (Context)
 import Html exposing (Html)
 import Json.Encode as Encode
-import Page.Exercise as Exercise
+import Page.ChooseWorkout as ChooseWorkout
 import Page.Home as Home
-import Page.SelectWorkout as SelectWorkout
 import Page.Workout as Workout
 import Ports
 import Route exposing (Route)
@@ -43,15 +42,13 @@ type alias Flags =
 
 type Model
     = Home Home.Model
-    | SelectWorkout SelectWorkout.Model
+    | ChooseWorkout ChooseWorkout.Model
     | Workout Workout.Model
-    | Exercise Exercise.Model
 
 
 type Msg
     = HomeMsg Home.Msg
-    | ExerciseMsg Exercise.Msg
-    | SelectWorkoutMsg SelectWorkout.Msg
+    | ChooseWorkoutMsg ChooseWorkout.Msg
     | WorkoutMsg Workout.Msg
     | AllExercises Encode.Value
     | LinkClicked Browser.UrlRequest
@@ -90,11 +87,8 @@ update msg model =
         ( HomeMsg msg_, Home model_ ) ->
             Home.update msg_ model_ |> updateHome
 
-        ( ExerciseMsg msg_, Exercise model_ ) ->
-            Exercise.update msg_ model_ |> updateExercise
-
-        ( SelectWorkoutMsg msg_, SelectWorkout model_ ) ->
-            SelectWorkout.update msg_ model_ |> updateSelectWorkout
+        ( ChooseWorkoutMsg msg_, ChooseWorkout model_ ) ->
+            ChooseWorkout.update msg_ model_ |> updateChooseWorkout
 
         ( WorkoutMsg msg_, Workout model_ ) ->
             Workout.update msg_ model_ |> updateWorkout
@@ -131,14 +125,9 @@ updateHome =
     updateWith Home HomeMsg
 
 
-updateSelectWorkout : ( SelectWorkout.Model, Cmd SelectWorkout.Msg ) -> ( Model, Cmd Msg )
-updateSelectWorkout =
-    updateWith SelectWorkout SelectWorkoutMsg
-
-
-updateExercise : ( Exercise.Model, Cmd Exercise.Msg ) -> ( Model, Cmd Msg )
-updateExercise =
-    updateWith Exercise ExerciseMsg
+updateChooseWorkout : ( ChooseWorkout.Model, Cmd ChooseWorkout.Msg ) -> ( Model, Cmd Msg )
+updateChooseWorkout =
+    updateWith ChooseWorkout ChooseWorkoutMsg
 
 
 updateWorkout : ( Workout.Model, Cmd Workout.Msg ) -> ( Model, Cmd Msg )
@@ -171,27 +160,14 @@ changeRouteTo maybeRoute model =
         Just Route.Home ->
             Home.init context |> updateHome
 
-        Just Route.SelectWorkout ->
-            SelectWorkout.init context |> updateSelectWorkout
+        Just Route.ChooseWorkout ->
+            ChooseWorkout.init context |> updateChooseWorkout
 
         Just Route.Workout ->
             Workout.init context |> updateWorkout
 
-        Just (Route.Exercise exerciseId) ->
-            handleExercise context exerciseId
-
         Nothing ->
             Home.init context |> updateHome
-
-
-handleExercise : Context -> Maybe String -> ( Model, Cmd Msg )
-handleExercise context exerciseId =
-    case exerciseId of
-        Just id ->
-            Exercise.init context id |> updateExercise
-
-        Nothing ->
-            SelectWorkout.init context |> updateSelectWorkout
 
 
 
@@ -204,13 +180,10 @@ getContext page =
         Home m ->
             m.context
 
-        SelectWorkout m ->
+        ChooseWorkout m ->
             m.context
 
         Workout m ->
-            m.context
-
-        Exercise m ->
             m.context
 
 
@@ -224,14 +197,11 @@ updateContext f model =
         Home m ->
             Home <| update_ m
 
-        SelectWorkout m ->
-            SelectWorkout <| update_ m
+        ChooseWorkout m ->
+            ChooseWorkout <| update_ m
 
         Workout m ->
             Workout <| update_ m
-
-        Exercise m ->
-            Exercise <| update_ m
 
 
 
@@ -252,14 +222,11 @@ pageSubscriptions page =
         Home model ->
             Home.subscriptions model |> Sub.map HomeMsg
 
-        SelectWorkout model ->
-            SelectWorkout.subscriptions model |> Sub.map SelectWorkoutMsg
+        ChooseWorkout model ->
+            ChooseWorkout.subscriptions model |> Sub.map ChooseWorkoutMsg
 
         Workout model ->
             Workout.subscriptions model |> Sub.map WorkoutMsg
-
-        Exercise model ->
-            Exercise.subscriptions model |> Sub.map ExerciseMsg
 
 
 
@@ -280,14 +247,10 @@ view_ page =
             Layout.layout "wide grip"
                 [ Html.map HomeMsg <| Home.view model ]
 
-        SelectWorkout model ->
+        ChooseWorkout model ->
             Layout.layout "choose workout"
-                [ Html.map SelectWorkoutMsg <| SelectWorkout.view model ]
+                [ Html.map ChooseWorkoutMsg <| ChooseWorkout.view model ]
 
         Workout model ->
             Layout.layout "workout"
                 [ Html.map WorkoutMsg <| Workout.view model ]
-
-        Exercise model ->
-            Layout.layout "exercise"
-                [ Html.map ExerciseMsg <| Exercise.view model ]

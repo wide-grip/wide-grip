@@ -6,7 +6,9 @@ module Data.Exercise exposing
     , categoryFromString
     , categoryToString
     , empty
+    , exercises
     , filterByCategory
+    , fromList
     , getById
     , ids
     , isEmpty
@@ -24,13 +26,14 @@ type Category
 
 
 type alias Exercises =
-    Dict String Exercise
+    Dict Int Exercise
 
 
 type alias Exercise =
-    { id : String
+    { id : Int
     , name : String
     , category : Category
+    , categoryId : Int
     }
 
 
@@ -43,18 +46,28 @@ empty =
     Dict.empty
 
 
+fromList : List Exercise -> Exercises
+fromList =
+    List.map (\ex -> ( ex.id, ex )) >> Dict.fromList
+
+
 
 -- Query
 
 
-getById : String -> Exercises -> Maybe Exercise
+getById : Int -> Exercises -> Maybe Exercise
 getById =
     Dict.get
 
 
-ids : Exercises -> List String
+ids : Exercises -> List Int
 ids =
     Dict.keys
+
+
+exercises : Exercises -> List Exercise
+exercises =
+    Dict.values
 
 
 filterByCategory : Category -> Exercises -> Exercises

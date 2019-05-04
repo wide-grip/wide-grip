@@ -100,7 +100,7 @@ continueWorkout =
 
 trackWorkout : Html msg
 trackWorkout =
-    a [ class "white no-underline", Route.href Route.SelectWorkout ]
+    a [ class "white no-underline", Route.href Route.ChooseWorkout ]
         [ p [ class "headline pointer mb4 bg-navy pa4 br-pill mw5 center" ]
             [ text "Track Workout" ]
         ]
@@ -110,7 +110,7 @@ handleResetWorkout : Model -> Html msg
 handleResetWorkout model =
     if model.workoutInProgress then
         a
-            [ Route.href Route.SelectWorkout
+            [ Route.href Route.ChooseWorkout
             , class "no-underline navy mt5 f6 db"
             ]
             [ text "reset workout" ]

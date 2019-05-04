@@ -1,6 +1,9 @@
 import * as cache from "./cache.js";
 import { Interop } from "./interop.js";
+import { exercises } from "../../exercises.json";
 const { Elm } = window;
+
+cache.setExercises(exercises)
 
 const app = Elm.Main.init({
   flags: {
@@ -9,5 +12,5 @@ const app = Elm.Main.init({
   }
 });
 
-const interop = Interop(app)
-interop.init()
+const interop = Interop(app);
+interop.init();

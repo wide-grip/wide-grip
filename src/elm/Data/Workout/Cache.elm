@@ -17,13 +17,13 @@ import Json.Encode as Encode
 
 encodeWorkout : Workout.Workout -> Encode.Value
 encodeWorkout =
-    Encode.dict identity encodeProgress
+    Workout.toList >> Encode.list encodeProgress
 
 
 encodeProgress : Workout.Progress -> Encode.Value
 encodeProgress progress =
     Encode.object
-        [ ( "exerciseId", Encode.string progress.exerciseId )
+        [ ( "exerciseId", Encode.int progress.exerciseId )
         , ( "complete", Encode.bool progress.complete )
         , ( "sets", Encode.list encodeSet progress.sets )
         ]
@@ -44,7 +44,9 @@ encodeSet set =
 
 decodeWorkout : Encode.Value -> Result Decode.Error Workout.Workout
 decodeWorkout =
-    Decode.decodeValue <| Decode.dict progressDecoder
+    Decode.list progressDecoder
+        |> Decode.map Workout.fromList
+        |> Decode.decodeValue
 
 
 decodeProgress : Encode.Value -> Result Decode.Error Workout.Progress
@@ -55,7 +57,7 @@ decodeProgress =
 progressDecoder : Decode.Decoder Workout.Progress
 progressDecoder =
     Decode.succeed Workout.Progress
-        |> Json.required "exerciseId" Decode.string
+        |> Json.required "exerciseId" Decode.int
         |> Json.optional "complete" Decode.bool False
         |> Json.optional "sets" (Decode.list setDecoder) []
 

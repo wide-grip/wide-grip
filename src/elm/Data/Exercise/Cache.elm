@@ -16,15 +16,16 @@ import Json.Encode as Encode
 
 encodeExercises : Exercises -> Encode.Value
 encodeExercises =
-    Encode.dict identity encodeExercise
+    Exercise.exercises >> Encode.list encodeExercise
 
 
 encodeExercise : Exercise -> Encode.Value
 encodeExercise ex =
     Encode.object
-        [ ( "exerciseId", Encode.string ex.id )
+        [ ( "id", Encode.int ex.id )
         , ( "name", Encode.string ex.name )
         , ( "category", Encode.string <| Exercise.categoryToString ex.category )
+        , ( "categoryId", Encode.int ex.categoryId )
         ]
 
 
@@ -32,29 +33,20 @@ encodeExercise ex =
 -- Decode
 
 
-type alias RawExercise =
-    { name : String
-    , workoutName : Exercise.Category
-    }
-
-
 decodeExercises : Encode.Value -> Result Decode.Error Exercises
 decodeExercises =
-    Decode.dict rawExerciseDecoder
-        |> Decode.map addIdToExercise
+    Decode.list exerciseDecoder
+        |> Decode.map Exercise.fromList
         |> Decode.decodeValue
 
 
-addIdToExercise : Dict String RawExercise -> Exercises
-addIdToExercise dct =
-    Dict.map (\id { name, workoutName } -> Exercise id name workoutName) dct
-
-
-rawExerciseDecoder : Decode.Decoder RawExercise
-rawExerciseDecoder =
-    Decode.succeed RawExercise
+exerciseDecoder : Decode.Decoder Exercise
+exerciseDecoder =
+    Decode.succeed Exercise
+        |> Json.required "id" Decode.int
         |> Json.required "name" Decode.string
-        |> Json.required "workoutName" workoutNameDecoder
+        |> Json.required "category" workoutNameDecoder
+        |> Json.required "categoryId" Decode.int
 
 
 workoutNameDecoder : Decode.Decoder Exercise.Category

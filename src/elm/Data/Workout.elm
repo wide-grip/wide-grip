@@ -2,7 +2,10 @@ module Data.Workout exposing
     ( Progress
     , Set
     , Workout
+    , addSet
+    , completeExercise
     , empty
+    , fromList
     , progress
     , toList
     , workout
@@ -12,11 +15,11 @@ import Dict exposing (Dict)
 
 
 type alias Workout =
-    Dict String Progress
+    Dict Int Progress
 
 
 type alias Progress =
-    { exerciseId : String
+    { exerciseId : Int
     , complete : Bool
     , sets : List Set
     }
@@ -43,7 +46,12 @@ toList =
     Dict.values
 
 
-progress : String -> Bool -> List Set -> Progress
+fromList : List Progress -> Workout
+fromList =
+    List.map (\p -> ( p.exerciseId, p )) >> Dict.fromList
+
+
+progress : Int -> Bool -> List Set -> Progress
 progress =
     Progress
 
@@ -51,3 +59,17 @@ progress =
 workout : List Progress -> Workout
 workout =
     List.map (\p -> ( p.exerciseId, p )) >> Dict.fromList
+
+
+
+-- Update
+
+
+addSet : Int -> Workout -> Set -> Workout
+addSet id w set =
+    Dict.update id (Maybe.map (\p -> { p | sets = set :: p.sets })) w
+
+
+completeExercise : Int -> Workout -> Workout
+completeExercise id =
+    Dict.update id (Maybe.map (\p -> { p | complete = True }))

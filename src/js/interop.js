@@ -5,9 +5,7 @@ export function Interop(app) {
 
   function init() {
     subscribeRestoreWorkout();
-    subscribeRestoreProgress();
     subscribeCacheWorkout();
-    subscribeCacheProgress();
     subscribeWorkoutInProgress();
   }
 
@@ -20,20 +18,6 @@ export function Interop(app) {
   function subscribeCacheWorkout() {
     ports.cacheWorkout.subscribe(workout => {
       cache.setWorkout(workout);
-    });
-  }
-
-  function subscribeRestoreProgress() {
-    ports.restoreExerciseProgressFromCache.subscribe(exerciseId => {
-      ports.recevieExerciseProgressFromCache.send(
-        cache.getProgress(exerciseId)
-      );
-    });
-  }
-
-  function subscribeCacheProgress() {
-    ports.cacheExerciseProgress.subscribe(progress => {
-      cache.setProgress(progress);
     });
   }
 
