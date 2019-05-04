@@ -1,21 +1,35 @@
-module Types exposing (..)
+module Types exposing
+    ( AllExercises
+    , CurrentSet
+    , Exercise
+    , ExerciseProgress
+    , FirebaseMessage
+    , Flags
+    , Model
+    , Msg(..)
+    , RecordedSet
+    , SubmitWorkoutStatus(..)
+    , View(..)
+    , Workout
+    , WorkoutName(..)
+    , WorkoutProgress
+    )
 
-import Date exposing (Date)
 import Dict exposing (Dict)
 import Json.Decode exposing (Value)
-import Time exposing (Time)
+import Time
 
 
 type alias Model =
     { view : View
-    , today : Date
-    , exercises : Result String AllExercises
+    , today : Time.Posix
+    , exercises : Maybe AllExercises
     , currentWorkout : Maybe Workout
     }
 
 
 type alias Flags =
-    { now : Time }
+    { now : Int }
 
 
 type Msg
@@ -47,14 +61,10 @@ type WorkoutName
     = Push
     | Pull
     | Legs
-    | UserDefined String
 
 
-type User
-    = Rob
-    | Andrew
-    | Eine
-    | Alex
+type alias User =
+    String
 
 
 type alias AllExercises =
@@ -72,7 +82,7 @@ type alias Workout =
     { workoutName : WorkoutName
     , progress : WorkoutProgress
     , currentExercise : Maybe Exercise
-    , users : List User
+    , users : List String
     , submitted : SubmitWorkoutStatus
     }
 
@@ -91,14 +101,14 @@ type alias ExerciseProgress =
 
 
 type alias RecordedSet =
-    { user : User
+    { user : String
     , weight : Int
     , reps : Int
     }
 
 
 type alias CurrentSet =
-    ( Result String Int, Result String Int )
+    ( Maybe Int, Maybe Int )
 
 
 type alias FirebaseMessage =

@@ -3,7 +3,7 @@ function isDevelopment () {
 }
 
 export function config () {
-  return isDevelopment() ? {
+  return isDevelopment() && false ? {
     apiKey: "AIzaSyBxq8JBDeqfCY4ZDuvKHNt_XVGlDgUgL2I",
     authDomain: "wide-grip-test.firebaseapp.com",
     databaseURL: "https://wide-grip-test.firebaseio.com",

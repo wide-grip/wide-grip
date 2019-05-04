@@ -1,4 +1,4 @@
-module Views.SelectExercisesForWorkout exposing (..)
+module Views.SelectExercisesForWorkout exposing (renderExercise, view)
 
 import Data.Workout exposing (currentExercises)
 import Helpers.Html exposing (renderDictValues)

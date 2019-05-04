@@ -1,4 +1,15 @@
-module Json.Cache.Decode exposing (..)
+module Json.Cache.Decode exposing
+    ( RawExercise
+    , addIdToExercise
+    , decodeExercises
+    , exerciseDecoder
+    , exerciseProgressDecoder
+    , rawExerciseDecoder
+    , recordedSetDecoder
+    , workoutDecoder
+    , workoutNameDecoder
+    , workoutNameFromString
+    )
 
 import Data.Workout exposing (emptySet)
 import Dict exposing (Dict)
@@ -9,54 +20,30 @@ import Types exposing (..)
 
 workoutDecoder : Decoder Workout
 workoutDecoder =
-    decode Workout
+    succeed Workout
         |> required "workoutName" workoutNameDecoder
         |> required "exercises" (dict exerciseProgressDecoder)
         |> required "currentExercise" (nullable exerciseDecoder)
-        |> required "users" (list userDecoder)
+        |> required "users" (list string)
         |> hardcoded NotSubmitted
 
 
 exerciseProgressDecoder : Decoder ExerciseProgress
 exerciseProgressDecoder =
-    decode ExerciseProgress
+    succeed ExerciseProgress
         |> required "exercise" exerciseDecoder
         |> required "sets" (list recordedSetDecoder)
         |> required "complete" bool
         |> hardcoded emptySet
-        |> hardcoded Rob
+        |> hardcoded "Rob"
 
 
 recordedSetDecoder : Decoder RecordedSet
 recordedSetDecoder =
-    decode RecordedSet
-        |> required "user" userDecoder
+    succeed RecordedSet
+        |> required "user" string
         |> required "weight" int
         |> required "reps" int
-
-
-userDecoder : Decoder User
-userDecoder =
-    string |> Json.Decode.andThen userFromString
-
-
-userFromString : String -> Decoder User
-userFromString userStr =
-    case userStr of
-        "Rob" ->
-            succeed Rob
-
-        "Andrew" ->
-            succeed Andrew
-
-        "Eine" ->
-            succeed Eine
-
-        "Alex" ->
-            succeed Alex
-
-        _ ->
-            fail "unrecognized user"
 
 
 type alias RawExercise =
@@ -65,7 +52,7 @@ type alias RawExercise =
     }
 
 
-decodeExercises : Value -> Result String AllExercises
+decodeExercises : Value -> Result Error AllExercises
 decodeExercises =
     dict rawExerciseDecoder
         |> Json.Decode.map addIdToExercise
@@ -79,7 +66,7 @@ addIdToExercise dct =
 
 exerciseDecoder : Decoder Exercise
 exerciseDecoder =
-    decode Exercise
+    succeed Exercise
         |> required "id" string
         |> required "name" string
         |> required "workoutName" workoutNameDecoder
@@ -87,7 +74,7 @@ exerciseDecoder =
 
 rawExerciseDecoder : Decoder RawExercise
 rawExerciseDecoder =
-    decode RawExercise
+    succeed RawExercise
         |> required "name" string
         |> required "workoutName" workoutNameDecoder
 
@@ -109,8 +96,5 @@ workoutNameFromString string =
         "Legs" ->
             succeed Legs
 
-        str ->
-            if String.startsWith "UserDefined " str then
-                Json.Decode.succeed <| UserDefined (String.dropLeft 12 str)
-            else
-                Json.Decode.fail "Invalid WorkoutName"
+        _ ->
+            Json.Decode.fail "Invalid WorkoutName"

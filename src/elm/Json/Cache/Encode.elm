@@ -1,8 +1,17 @@
-module Json.Cache.Encode exposing (..)
+module Json.Cache.Encode exposing
+    ( encodeAllExercises
+    , encodeCurrentExercise
+    , encodeCurrentWorkout
+    , encodeExercise
+    , encodeExerciseProgress
+    , encodeRecordedSet
+    , encodeWorkout
+    )
 
-import Date exposing (Date)
+import Data.Workout exposing (workoutNameToString)
 import Dict
 import Json.Encode exposing (..)
+import Time
 import Types exposing (..)
 
 
@@ -11,17 +20,18 @@ encodeCurrentWorkout model =
     model.currentWorkout |> Maybe.andThen (encodeWorkout model.today)
 
 
-encodeWorkout : Date -> Workout -> Maybe Value
+encodeWorkout : Time.Posix -> Workout -> Maybe Value
 encodeWorkout today workout =
     if List.isEmpty <| encodeAllExercises workout then
         Nothing
+
     else
         Just <|
             object
-                [ ( "date", float <| Date.toTime today )
-                , ( "workoutName", string <| toString workout.workoutName )
+                [ ( "date", int <| Time.posixToMillis today )
+                , ( "workoutName", string <| workoutNameToString workout.workoutName )
                 , ( "currentExercise", encodeCurrentExercise workout.currentExercise )
-                , ( "users", list <| List.map (toString >> string) workout.users )
+                , ( "users", list string workout.users )
                 , ( "exercises", object <| encodeAllExercises workout )
                 ]
 
@@ -45,7 +55,7 @@ encodeExerciseProgress exerciseId progress =
     ( exerciseId
     , object
         [ ( "complete", bool progress.complete )
-        , ( "sets", list <| List.map (encodeRecordedSet) progress.sets )
+        , ( "sets", list encodeRecordedSet progress.sets )
         , ( "exercise", encodeExercise progress.exercise )
         ]
     )
@@ -56,14 +66,14 @@ encodeExercise ex =
     object
         [ ( "id", string ex.id )
         , ( "name", string ex.name )
-        , ( "workoutName", string <| toString ex.workoutName )
+        , ( "workoutName", string <| workoutNameToString ex.workoutName )
         ]
 
 
 encodeRecordedSet : RecordedSet -> Value
 encodeRecordedSet recordedSet =
     object
-        [ ( "user", string <| toString recordedSet.user )
+        [ ( "user", string recordedSet.user )
         , ( "weight", int recordedSet.weight )
         , ( "reps", int recordedSet.reps )
         ]

@@ -1,4 +1,10 @@
-port module Data.Ports exposing (..)
+port module Ports exposing
+    ( cacheCurrentWorkout
+    , receiveCurrentWorkoutState
+    , receiveExercises
+    , receiveSubmitWorkoutStatus
+    , submitWorkout
+    )
 
 import Json.Decode exposing (Value)
 import Types exposing (FirebaseMessage)

@@ -1,4 +1,4 @@
-module Views.StartAnExercise exposing (..)
+module Views.StartAnExercise exposing (createExerciseList, handleStart, renderCurrentSubmitStatus, renderExercise, renderIcon, renderSubmitStatus, view)
 
 import Data.Workout exposing (currentExercises)
 import Helpers.Html exposing (emptyProperty, renderDict, renderDictValues)
@@ -44,6 +44,7 @@ renderIcon : ExerciseProgress -> Html msg
 renderIcon progress =
     if progress.complete then
         tick
+
     else
         fist
 

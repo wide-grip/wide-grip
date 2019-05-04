@@ -1,4 +1,4 @@
-module Views.Home exposing (..)
+module Views.Home exposing (renderOptions, view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -15,10 +15,10 @@ view model =
         ]
 
 
-renderOptions : Result String AllExercises -> Html Msg
+renderOptions : Maybe AllExercises -> Html Msg
 renderOptions allExercises =
     case allExercises of
-        Ok _ ->
+        Just _ ->
             div []
                 [ p
                     [ onClick <| SetView SelectSession
@@ -32,5 +32,5 @@ renderOptions allExercises =
                     [ text "Your Gainz" ]
                 ]
 
-        Err _ ->
+        Nothing ->
             p [] [ text "Loading..." ]

@@ -1,4 +1,4 @@
-module Views.RecordSet exposing (..)
+module Views.RecordSet exposing (view)
 
 import Data.Workout exposing (currentExerciseName, currentSet, currentUser, validSet)
 import Helpers.Style exposing (classes)
@@ -54,7 +54,7 @@ nextSetButton workout =
             fistButtonDisabled "next set"
 
 
-user : Model -> User -> Html Msg
+user : Model -> String -> Html Msg
 user model u =
     div
         [ classes
@@ -69,14 +69,14 @@ user model u =
             ]
         , onClick <| SetCurrentUser u
         ]
-        [ text <| toString u ]
+        [ text u ]
 
 
-isCurrentUser : User -> Maybe Workout -> Bool
-isCurrentUser user workout =
+isCurrentUser : String -> Maybe Workout -> Bool
+isCurrentUser u workout =
     workout
         |> Maybe.andThen currentUser
-        |> Maybe.map ((==) user)
+        |> Maybe.map ((==) u)
         |> Maybe.withDefault False
 
 
@@ -87,7 +87,7 @@ renderCurrentExerciseName currentWorkout =
         |> Maybe.withDefault ""
 
 
-currentUsers : Maybe Workout -> List User
+currentUsers : Maybe Workout -> List String
 currentUsers =
     Maybe.map .users >> Maybe.withDefault []
 
@@ -102,9 +102,9 @@ currentWeightInputValue =
     currentSetInputValue Tuple.first
 
 
-currentSetInputValue : (CurrentSet -> Result String Int) -> Maybe Workout -> String
+currentSetInputValue : (CurrentSet -> Maybe Int) -> Maybe Workout -> String
 currentSetInputValue f currentWorkout =
     currentWorkout
         |> Maybe.andThen currentSet
-        |> Maybe.map (f >> Result.map toString >> Result.withDefault "")
+        |> Maybe.andThen (f >> Maybe.map String.fromInt)
         |> Maybe.withDefault ""

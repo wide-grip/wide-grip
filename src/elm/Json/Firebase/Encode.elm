@@ -1,54 +1,56 @@
-module Json.Firebase.Encode exposing (..)
+module Json.Firebase.Encode exposing
+    ( encodeCurrentWorkout
+    , encodeExercise
+    , encodeRecordedSet
+    , encodeWorkout
+    , nonEmptyExercise
+    )
 
-import Date exposing (Date)
+import Data.Workout exposing (workoutNameToString)
 import Dict exposing (Dict)
 import Json.Encode exposing (..)
+import Time
 import Types exposing (..)
 
 
 encodeCurrentWorkout : Model -> Maybe Value
 encodeCurrentWorkout model =
-    model.currentWorkout |> Maybe.andThen (encodeWorkout model.today)
+    Maybe.andThen (encodeWorkout model.today) model.currentWorkout
 
 
-encodeWorkout : Date -> Workout -> Maybe Value
+encodeWorkout : Time.Posix -> Workout -> Maybe Value
 encodeWorkout today workout =
-    if List.isEmpty <| encodeAllExercises workout then
+    if List.isEmpty <| allExercises workout then
         Nothing
+
     else
         Just <|
             object
-                [ ( "date", float <| Date.toTime today )
-                , ( "workoutName", string <| toString workout.workoutName )
-                , ( "exercises", list <| encodeAllExercises workout )
+                [ ( "date", int <| Time.posixToMillis today )
+                , ( "workoutName", string <| workoutNameToString workout.workoutName )
+                , ( "exercises", list encodeExercise <| allExercises workout )
                 ]
 
 
-encodeAllExercises : Workout -> List Value
-encodeAllExercises workout =
-    workout.progress
-        |> Dict.filter (always nonEmptyExercise)
-        |> Dict.map encodeExercise
-        |> Dict.values
-        |> List.concat
+allExercises : Workout -> List ( String, ExerciseProgress )
+allExercises =
+    .progress >> Dict.filter (always nonEmptyExercise) >> Dict.toList
 
 
 nonEmptyExercise : ExerciseProgress -> Bool
-nonEmptyExercise progress =
-    progress.sets
-        |> List.isEmpty
-        |> not
+nonEmptyExercise =
+    .sets >> List.isEmpty >> not
 
 
-encodeExercise : String -> ExerciseProgress -> List Value
-encodeExercise exerciseId exerciseProgress =
-    List.map (encodeRecordedSet exerciseId) exerciseProgress.sets
+encodeExercise : ( String, ExerciseProgress ) -> Value
+encodeExercise ( exerciseId, exerciseProgress ) =
+    list (encodeRecordedSet exerciseId) exerciseProgress.sets
 
 
 encodeRecordedSet : String -> RecordedSet -> Value
 encodeRecordedSet exerciseId recordedSet =
     object
-        [ ( "user", string <| toString recordedSet.user )
+        [ ( "user", string recordedSet.user )
         , ( "weight", int recordedSet.weight )
         , ( "reps", int recordedSet.reps )
         , ( "exerciseId", string exerciseId )

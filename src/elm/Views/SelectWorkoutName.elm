@@ -1,6 +1,6 @@
-module Views.SelectWorkoutName exposing (..)
+module Views.SelectWorkoutName exposing (selectWorkoutName, view)
 
-import Data.Workout exposing (renderWorkoutName)
+import Data.Workout exposing (workoutNameToString)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (..)
@@ -24,4 +24,4 @@ selectWorkoutName workoutName =
         [ onClick <| StartWorkout workoutName
         , class "pointer mv4 headline tracked ttu bg-animate hover-bg-navy bg-gray pa3 br-pill white mw5 center"
         ]
-        [ text <| renderWorkoutName workoutName ]
+        [ text <| workoutNameToString workoutName ]

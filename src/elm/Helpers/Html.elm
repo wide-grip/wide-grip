@@ -1,4 +1,4 @@
-module Helpers.Html exposing (..)
+module Helpers.Html exposing (emptyProperty, renderDict, renderDictValues)
 
 import Dict exposing (Dict)
 import Html exposing (Attribute, Html)

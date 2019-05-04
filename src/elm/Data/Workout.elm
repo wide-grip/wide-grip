@@ -1,45 +1,77 @@
-module Data.Workout exposing (..)
+module Data.Workout exposing
+    ( appendSet
+    , currentExerciseName
+    , currentExerciseProgress
+    , currentExercises
+    , currentSet
+    , currentUser
+    , defaultExercises
+    , emptySet
+    , finishSet
+    , handleFinishSet
+    , initExerciseProgress
+    , resetCurrentExercise
+    , setCompleteToFalse
+    , setCurrentUser
+    , submitSet
+    , updateCurrentExercise
+    , updateCurrentExerciseWith
+    , updateCurrentExerciseWith_
+    , updateCurrentSetReps
+    , updateCurrentSetWeight
+    , updateCurrentUser
+    , updateInputReps
+    , updateInputWeight
+    , updateReps
+    , updateWeight
+    , validInputSet
+    , validSet
+    , workoutNameToString
+    )
 
 import Dict exposing (Dict)
 import Types exposing (..)
 
 
-renderWorkoutName : WorkoutName -> String
-renderWorkoutName workoutName =
+workoutNameToString : WorkoutName -> String
+workoutNameToString workoutName =
     case workoutName of
-        UserDefined str ->
-            str
+        Push ->
+            "Push"
 
-        workoutName ->
-            toString workoutName
+        Pull ->
+            "Pull"
+
+        Legs ->
+            "Legs"
 
 
-defaultExercises : WorkoutName -> List User -> AllExercises -> WorkoutProgress
+defaultExercises : WorkoutName -> List String -> AllExercises -> WorkoutProgress
 defaultExercises workoutName users allExercises =
     allExercises
         |> Dict.filter (\_ v -> v.workoutName == workoutName)
         |> Dict.map (initExerciseProgress users)
 
 
-initExerciseProgress : List User -> String -> Exercise -> ExerciseProgress
+initExerciseProgress : List String -> String -> Exercise -> ExerciseProgress
 initExerciseProgress users _ exercise =
     { exercise = exercise
     , sets = []
     , complete = False
     , currentSet = emptySet
-    , currentUser = List.head users |> Maybe.withDefault Rob
+    , currentUser = List.head users |> Maybe.withDefault "Rob"
     }
 
 
-currentUser : Workout -> Maybe User
+currentUser : Workout -> Maybe String
 currentUser =
     currentExerciseProgress >> Maybe.map .currentUser
 
 
-emptySet : ( Result String Int, Result String Int )
+emptySet : ( Maybe Int, Maybe Int )
 emptySet =
-    ( Err "not entered"
-    , Err "not entered"
+    ( Nothing
+    , Nothing
     )
 
 
@@ -58,7 +90,7 @@ handleFinishSet =
     updateCurrentExerciseWith finishSet >> resetCurrentExercise
 
 
-updateCurrentUser : User -> Workout -> Workout
+updateCurrentUser : String -> Workout -> Workout
 updateCurrentUser =
     updateCurrentExerciseWith << setCurrentUser
 
@@ -94,7 +126,7 @@ updateCurrentExerciseWith_ f currentExercise exercises =
         |> Maybe.withDefault exercises
 
 
-setCurrentUser : User -> ExerciseProgress -> ExerciseProgress
+setCurrentUser : String -> ExerciseProgress -> ExerciseProgress
 setCurrentUser user exercise =
     { exercise | currentUser = user }
 
@@ -141,10 +173,10 @@ finishSet exercise =
     }
 
 
-appendSet : User -> CurrentSet -> List RecordedSet -> List RecordedSet
-appendSet user currentSet sets =
-    case currentSet of
-        ( Ok weight, Ok reps ) ->
+appendSet : String -> CurrentSet -> List RecordedSet -> List RecordedSet
+appendSet user currentSet_ sets =
+    case currentSet_ of
+        ( Just weight, Just reps ) ->
             RecordedSet user weight reps :: sets
 
         _ ->
@@ -157,9 +189,9 @@ validSet =
 
 
 validInputSet : CurrentSet -> Bool
-validInputSet currentSet =
-    case currentSet of
-        ( Ok _, Ok _ ) ->
+validInputSet currentSet_ =
+    case currentSet_ of
+        ( Nothing, Nothing ) ->
             True
 
         _ ->

@@ -1,4 +1,4 @@
-module Helpers.Style exposing (..)
+module Helpers.Style exposing (backgroundImage, classes, heightStyle, widthStyle)
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (class)
@@ -9,14 +9,14 @@ backgroundImage src =
     ( "background-image", "url(" ++ src ++ ")" )
 
 
-widthStyle : number -> ( String, String )
+widthStyle : Float -> ( String, String )
 widthStyle number =
-    ( "width", toString number ++ "px" )
+    ( "width", String.fromFloat number ++ "px" )
 
 
-heightStyle : number -> ( String, String )
+heightStyle : Float -> ( String, String )
 heightStyle number =
-    ( "height", toString number ++ "px" )
+    ( "height", String.fromFloat number ++ "px" )
 
 
 classes : List String -> Attribute msg

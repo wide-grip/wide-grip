@@ -1,13 +1,14 @@
-module State exposing (..)
+module State exposing (init, subscriptions, update)
 
-import Data.Ports exposing (..)
 import Data.Workout exposing (..)
-import Date
 import Json.Cache.Decode as DecodeCache
 import Json.Cache.Encode as EncodeCache
-import Json.Firebase.Encode as EncodeFirebase
 import Json.Decode exposing (Value, decodeValue)
+import Json.Firebase.Encode as EncodeFirebase
+import Ports exposing (..)
+import Time
 import Types exposing (..)
+
 
 
 -- INIT
@@ -15,14 +16,16 @@ import Types exposing (..)
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    initialModel flags ! []
+    ( initialModel flags
+    , Cmd.none
+    )
 
 
 initialModel : Flags -> Model
 initialModel flags =
     { view = Home
-    , today = Date.fromTime flags.now
-    , exercises = Err "no exercises yet"
+    , today = Time.millisToPosix flags.now
+    , exercises = Nothing
     , currentWorkout = Nothing
     }
 
@@ -35,37 +38,51 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SetView view ->
-            setView view model ! []
+            ( setView view model
+            , Cmd.none
+            )
 
         StartWorkout workoutName ->
-            handleStartWorkout workoutName model ! []
+            ( handleStartWorkout workoutName model
+            , Cmd.none
+            )
 
         ConfirmExercises ->
-            setView StartAnExercise model ! []
+            ( setView StartAnExercise model
+            , Cmd.none
+            )
 
         StartExercise exercise ->
-            (model
+            ( model
                 |> updateCurrentWorkout (updateCurrentExercise exercise)
                 |> updateCurrentWorkout (updateCurrentExerciseWith setCompleteToFalse)
                 |> setView RecordSet
+            , Cmd.none
             )
-                ! []
 
         InputWeight weightStr ->
-            updateCurrentWorkout (updateInputWeight weightStr) model ! []
+            ( updateCurrentWorkout (updateInputWeight weightStr) model
+            , Cmd.none
+            )
 
         InputReps repStr ->
-            updateCurrentWorkout (updateInputReps repStr) model ! []
+            ( updateCurrentWorkout (updateInputReps repStr) model
+            , Cmd.none
+            )
 
         SetCurrentUser user ->
-            updateCurrentWorkout (updateCurrentUser user) model ! []
+            ( updateCurrentWorkout (updateCurrentUser user) model
+            , Cmd.none
+            )
 
         SubmitSet ->
             let
                 newModel =
                     updateCurrentWorkout handleSubmitSet model
             in
-                newModel ! [ handleCacheWorkout newModel ]
+            ( newModel
+            , handleCacheWorkout newModel
+            )
 
         FinishCurrentExercise ->
             let
@@ -74,19 +91,29 @@ update msg model =
                         |> updateCurrentWorkout handleFinishSet
                         |> setView StartAnExercise
             in
-                newModel ! [ handleCacheWorkout newModel ]
+            ( newModel
+            , handleCacheWorkout newModel
+            )
 
         ReceiveExercises val ->
-            { model | exercises = DecodeCache.decodeExercises val } ! []
+            ( { model | exercises = Result.toMaybe <| DecodeCache.decodeExercises val }
+            , Cmd.none
+            )
 
         SubmitWorkout ->
-            model ! [ handleSubmitWorkout model ]
+            ( model
+            , handleSubmitWorkout model
+            )
 
         ReceiveSubmitWorkoutStatus message ->
-            handleSubmitWorkoutStatus message model ! []
+            ( handleSubmitWorkoutStatus message model
+            , Cmd.none
+            )
 
         ReceiveCachedCurrentWorkoutState val ->
-            handleRestoreCurrentWorkoutFromCache val model ! []
+            ( handleRestoreCurrentWorkoutFromCache val model
+            , Cmd.none
+            )
 
 
 handleRestoreCurrentWorkoutFromCache : Value -> Model -> Model
@@ -134,13 +161,13 @@ handleSubmitWorkout model =
 handleStartWorkout : WorkoutName -> Model -> Model
 handleStartWorkout workoutName model =
     case model.exercises of
-        Ok allExercises ->
+        Just allExercises ->
             { model
-                | currentWorkout = initWorkout workoutName [ Andrew, Rob ] allExercises
+                | currentWorkout = initWorkout workoutName [ "Andrew", "Rob" ] allExercises
                 , view = SelectExercisesForWorkout
             }
 
-        Err _ ->
+        Nothing ->
             model
 
 
@@ -150,18 +177,19 @@ handleSubmitWorkoutStatus firebaseMessage model =
         submitStatus =
             messageToSubmitWorkoutStatus firebaseMessage
     in
-        updateCurrentWorkout (\w -> { w | submitted = submitStatus }) model
+    updateCurrentWorkout (\w -> { w | submitted = submitStatus }) model
 
 
 messageToSubmitWorkoutStatus : FirebaseMessage -> SubmitWorkoutStatus
 messageToSubmitWorkoutStatus message =
     if message.success then
         Success
+
     else
         Failure message.reason
 
 
-initWorkout : WorkoutName -> List User -> AllExercises -> Maybe Workout
+initWorkout : WorkoutName -> List String -> AllExercises -> Maybe Workout
 initWorkout workoutName users allExercises =
     Just
         { workoutName = workoutName
@@ -181,6 +209,7 @@ handleSubmitSet : Workout -> Workout
 handleSubmitSet workout =
     if validSet workout then
         updateCurrentExerciseWith submitSet workout
+
     else
         workout
 
