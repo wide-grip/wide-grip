@@ -1,0 +1,5 @@
+- args:
+    name: workout
+    new_name: category
+    table: exercises
+  type: rename_relationship

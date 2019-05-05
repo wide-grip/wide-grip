@@ -1,0 +1,62 @@
+- args:
+    functions: []
+    query_templates: []
+    remote_schemas: []
+    tables:
+    - array_relationships: []
+      delete_permissions: []
+      event_triggers: []
+      insert_permissions: []
+      object_relationships:
+      - comment: null
+        name: user
+        using:
+          foreign_key_constraint_on: userId
+      - comment: null
+        name: exercise
+        using:
+          foreign_key_constraint_on: exerciseId
+      select_permissions: []
+      table: sets
+      update_permissions: []
+    - array_relationships: []
+      delete_permissions: []
+      event_triggers: []
+      insert_permissions: []
+      object_relationships: []
+      select_permissions: []
+      table: users
+      update_permissions: []
+    - array_relationships:
+      - comment: null
+        name: sets
+        using:
+          foreign_key_constraint_on:
+            column: exerciseId
+            table: sets
+      delete_permissions: []
+      event_triggers: []
+      insert_permissions: []
+      object_relationships:
+      - comment: null
+        name: workout
+        using:
+          foreign_key_constraint_on: workoutId
+      select_permissions: []
+      table: exercises
+      update_permissions: []
+    - array_relationships:
+      - comment: null
+        name: exercises
+        using:
+          foreign_key_constraint_on:
+            column: workoutId
+            table: exercises
+      delete_permissions: []
+      event_triggers: []
+      insert_permissions: []
+      object_relationships: []
+      select_permissions: []
+      table: workouts
+      update_permissions: []
+  type: replace_metadata
