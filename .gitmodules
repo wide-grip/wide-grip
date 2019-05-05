@@ -1,0 +1,3 @@
+[submodule "graphql-engine-heroku"]
+	path = graphql-engine-heroku
+	url = https://github.com/hasura/graphql-engine-heroku.git
