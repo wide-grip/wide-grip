@@ -7,7 +7,7 @@
     "deploy": "npm run build && npm run compress && firebase deploy",
     "build": "npm run elm-build & npm run js-build & npm run css-build",
     "dev": "npm run elm-dev & npm run js-dev & npm run css-dev",
-    "elm-dev": "elm-live src/elm/Main.elm --pushstate --open --dir=public -- --output=public/elm.js  --debug",
+    "elm-dev": "elm-live src/elm/Main.elm --pushstate --open --dir=public -- --output=public/elm.js",
     "elm-build": "elm make src/elm/Main.elm --output=public/elm.js",
     "js-dev": "watchify src/js/index.js -o public/embed.js --verbose",
     "js-build": "browserify src/js/index.js -o public/embed.js --verbose",
@@ -15,7 +15,8 @@
     "css-build": "postcss src/css/index.css --output public/style.min.css --config postcss.config.js --verbose",
     "compress": "npm run compress-main & npm run compress-embed",
     "compress-main": "uglifyjs -c -m -o public/elm.js public/elm.js",
-    "compress-embed": "uglifyjs -c -m -o public/embed.js public/embed.js"
+    "compress-embed": "uglifyjs -c -m -o public/embed.js public/embed.js",
+    "schema": "elm-graphql http://localhost:8080/v1alpha1/graphql --base Api --output src/elm"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   },
   "homepage": "https://github.com/wide-grip/wide-grip#readme",
   "devDependencies": {
+    "@dillonkearns/elm-graphql": "^3.4.0",
     "autoprefixer": "^8.1.0",
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
@@ -43,7 +45,6 @@
     "watchify": "^3.11.0"
   },
   "dependencies": {
-    "firebase": "^4.11.0",
     "tachyons-custom": "^4.9.4"
   },
   "browserify": {

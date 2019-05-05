@@ -1,5 +1,6 @@
 port module Ports exposing
-    ( cacheWorkout
+    ( cacheExercises
+    , cacheWorkout
     , receiveExercises
     , receiveWorkoutFromCache
     , receiveWorkoutInProgress
@@ -11,6 +12,9 @@ import Json.Encode as Encode
 
 
 port receiveExercises : (Encode.Value -> msg) -> Sub msg
+
+
+port cacheExercises : Encode.Value -> Cmd msg
 
 
 port cacheWorkout : Encode.Value -> Cmd msg

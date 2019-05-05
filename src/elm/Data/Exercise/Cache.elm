@@ -3,7 +3,7 @@ module Data.Exercise.Cache exposing
     , encodeExercises
     )
 
-import Data.Exercise as Exercise exposing (Exercise, Exercises)
+import Data.Exercise as Exercise exposing (Category, Exercise, Exercises)
 import Dict exposing (Dict)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Json
@@ -24,8 +24,15 @@ encodeExercise ex =
     Encode.object
         [ ( "id", Encode.int ex.id )
         , ( "name", Encode.string ex.name )
-        , ( "category", Encode.string <| Exercise.categoryToString ex.category )
-        , ( "categoryId", Encode.int ex.categoryId )
+        , ( "category", encodeCategory ex.category )
+        ]
+
+
+encodeCategory : Category -> Encode.Value
+encodeCategory cat =
+    Encode.object
+        [ ( "id", Encode.int cat.id )
+        , ( "name", Encode.string cat.name )
         ]
 
 
@@ -45,16 +52,11 @@ exerciseDecoder =
     Decode.succeed Exercise
         |> Json.required "id" Decode.int
         |> Json.required "name" Decode.string
-        |> Json.required "category" workoutNameDecoder
-        |> Json.required "categoryId" Decode.int
+        |> Json.required "category" categoryDecoder
 
 
-workoutNameDecoder : Decode.Decoder Exercise.Category
-workoutNameDecoder =
-    let
-        workoutNameFromString =
-            Exercise.categoryFromString
-                >> Maybe.withDefault Exercise.Push
-                >> Decode.succeed
-    in
-    Decode.andThen workoutNameFromString Decode.string
+categoryDecoder : Decode.Decoder Category
+categoryDecoder =
+    Decode.succeed Category
+        |> Json.required "id" Decode.int
+        |> Json.required "name" Decode.string

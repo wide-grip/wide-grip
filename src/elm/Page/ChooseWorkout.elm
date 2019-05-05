@@ -143,11 +143,7 @@ view model =
 
 chooseCategory : Model -> Html Msg
 chooseCategory model =
-    div []
-        [ selectCategory Exercise.Push
-        , selectCategory Exercise.Pull
-        , selectCategory Exercise.Legs
-        ]
+    div [] <| List.map selectCategory <| Exercise.categories model.context.exercises
 
 
 selectCategory : Exercise.Category -> Html Msg
@@ -156,7 +152,7 @@ selectCategory category =
         [ onClick <| SelectCategory category
         , class "pointer mv4 headline tracked ttu bg-animate hover-bg-navy bg-gray pa3 br-pill white mw5 center"
         ]
-        [ text <| Exercise.categoryToString category ]
+        [ text category.name ]
 
 
 chooseExercises : Model -> Html Msg

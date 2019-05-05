@@ -17,3 +17,7 @@ public/style.min.css
 
 # Backup files
 backups
+
+# Elm Graphql
+
+src/elm/Api

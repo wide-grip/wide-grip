@@ -1,12 +1,14 @@
 module Context exposing
     ( Context
     , empty
-    , updateAllExercises
+    , updateExercises
     )
 
 import Browser.Navigation as Navigation
 import Data.Exercise as Exercise exposing (Exercises)
 import Data.Exercise.Cache as Cache
+import Data.Exercise.Graphql
+import Graphql.Http
 import Json.Encode as Encode
 import Time
 
@@ -19,22 +21,15 @@ type alias Context =
     }
 
 
-empty : Navigation.Key -> Int -> Encode.Value -> Context
+empty : Navigation.Key -> Int -> Exercises -> Context
 empty navKey now exercises =
     { today = Time.millisToPosix now
     , users = [ "Rob", "Andrew" ]
-    , exercises = decodeExercises exercises
+    , exercises = exercises
     , navKey = navKey
     }
 
 
-updateAllExercises : Encode.Value -> Context -> Context
-updateAllExercises exercises context =
-    { context | exercises = decodeExercises exercises }
-
-
-decodeExercises : Encode.Value -> Exercises
-decodeExercises =
-    Cache.decodeExercises
-        >> Result.toMaybe
-        >> Maybe.withDefault Exercise.empty
+updateExercises : Exercises -> Context -> Context
+updateExercises exercises context =
+    { context | exercises = exercises }

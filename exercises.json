@@ -1,13 +1,13 @@
 {
   "exercises": [
-    { "id": 1, "name": "Bench Press", "category": "Push", "categoryId": 1 },
-    { "id": 2, "name": "Rope Pull Down", "category": "Push", "categoryId": 1 },
-    { "id": 3, "name": "Bar Pull Down", "category": "Push", "categoryId": 1 },
-    { "id": 4, "name": "Pull Ups", "category": "Pull", "categoryId": 2 },
-    { "id": 5, "name": "Seated Rows", "category": "Pull", "categoryId": 2 },
-    { "id": 6, "name": "Lateral Pulldown", "category": "Pull", "categoryId": 2 },
-    { "id": 7, "name": "Squats", "category": "Legs", "categoryId": 3 },
-    { "id": 8, "name": "Lunges", "category": "Legs", "categoryId": 3 },
-    { "id": 8, "name": "Calf Raises", "category": "Legs", "categoryId": 3 }
+    { "id": 1, "name": "Bench Press", "category": { "name": "Push", "id": 1 } },
+    { "id": 2, "name": "Rope Pull Down", "category": { "name": "Push", "id": 1 } },
+    { "id": 3, "name": "Bar Pull Down", "category": { "name": "Push", "id": 1 } },
+    { "id": 4, "name": "Pull Ups", "category": { "name": "Pull", "id": 2 } },
+    { "id": 5, "name": "Seated Rows", "category": { "name": "Pull", "id": 2 } },
+    { "id": 6, "name": "Lateral Pulldown", "category": { "name": "Pull", "id": 2 } },
+    { "id": 7, "name": "Squats", "category": { "name": "Legs", "id": 3 } },
+    { "id": 8, "name": "Lunges", "category": { "name": "Legs", "id": 3 } },
+    { "id": 8, "name": "Calf Raises", "category": { "name": "Legs", "id": 3  }}
   ]
 }

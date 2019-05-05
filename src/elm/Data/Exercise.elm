@@ -1,10 +1,9 @@
 module Data.Exercise exposing
-    ( Category(..)
+    ( Category
     , Exercise
     , Exercises
     , add
-    , categoryFromString
-    , categoryToString
+    , categories
     , empty
     , exercises
     , filterByCategory
@@ -19,10 +18,10 @@ module Data.Exercise exposing
 import Dict exposing (Dict)
 
 
-type Category
-    = Push
-    | Pull
-    | Legs
+type alias Category =
+    { id : Int
+    , name : String
+    }
 
 
 type alias Exercises =
@@ -33,7 +32,6 @@ type alias Exercise =
     { id : Int
     , name : String
     , category : Category
-    , categoryId : Int
     }
 
 
@@ -70,6 +68,16 @@ exercises =
     Dict.values
 
 
+categories : Exercises -> List Category
+categories =
+    exercises >> List.map .category >> unique
+
+
+unique : List Category -> List Category
+unique =
+    List.map (\cat -> ( cat.id, cat )) >> Dict.fromList >> Dict.values
+
+
 filterByCategory : Category -> Exercises -> Exercises
 filterByCategory category =
     Dict.filter (\_ exercise -> exercise.category == category)
@@ -97,36 +105,3 @@ add exercise =
 remove : Exercise -> Exercises -> Exercises
 remove exercise =
     Dict.remove exercise.id
-
-
-
--- String
-
-
-categoryToString : Category -> String
-categoryToString category =
-    case category of
-        Push ->
-            "Push"
-
-        Pull ->
-            "Pull"
-
-        Legs ->
-            "Legs"
-
-
-categoryFromString : String -> Maybe Category
-categoryFromString string =
-    case string of
-        "Push" ->
-            Just Push
-
-        "Pull" ->
-            Just Pull
-
-        "Legs" ->
-            Just Legs
-
-        _ ->
-            Nothing

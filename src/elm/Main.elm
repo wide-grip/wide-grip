@@ -3,6 +3,10 @@ module Main exposing (main)
 import Browser
 import Browser.Navigation as Navigation
 import Context exposing (Context)
+import Data.Exercise as Exercise exposing (Exercises)
+import Data.Exercise.Cache
+import Data.Exercise.Graphql
+import Graphql.Http
 import Html exposing (Html)
 import Json.Encode as Encode
 import Page.ChooseWorkout as ChooseWorkout
@@ -50,9 +54,14 @@ type Msg
     = HomeMsg Home.Msg
     | ChooseWorkoutMsg ChooseWorkout.Msg
     | WorkoutMsg Workout.Msg
-    | AllExercises Encode.Value
+    | GotCachedExercises Encode.Value
+    | GotExercises GQLResult
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
+
+
+type alias GQLResult =
+    Result (Graphql.Http.Error Exercises) Exercises
 
 
 
@@ -61,7 +70,9 @@ type Msg
 
 init : Flags -> Url.Url -> Navigation.Key -> ( Model, Cmd Msg )
 init flags url key =
-    emptyPage key flags |> changeRouteTo (Route.fromUrl url)
+    emptyPage key flags
+        |> changeRouteTo (Route.fromUrl url)
+        |> addCmd getExercises
 
 
 emptyPage : Navigation.Key -> Flags -> Model
@@ -74,7 +85,7 @@ emptyPage key flags =
 
 initialContext : Navigation.Key -> Flags -> Context
 initialContext key flags =
-    Context.empty key flags.now flags.exercises
+    Context.empty key flags.now <| decodeExercises flags.exercises
 
 
 
@@ -99,11 +110,27 @@ update msg model =
         ( UrlChanged url, _ ) ->
             changeRouteTo (Route.fromUrl url) model
 
-        ( AllExercises exercises, _ ) ->
-            ( updateContext (Context.updateAllExercises exercises) model, Cmd.none )
+        ( GotCachedExercises exercises, _ ) ->
+            ( updateContext (Context.updateExercises <| decodeExercises exercises) model, Cmd.none )
+
+        ( GotExercises (Ok exercises), _ ) ->
+            ( updateContext (Context.updateExercises exercises) model, cacheExercises exercises )
 
         _ ->
             ( model, Cmd.none )
+
+
+cacheExercises : Exercises -> Cmd Msg
+cacheExercises =
+    Data.Exercise.Cache.encodeExercises
+        >> Ports.cacheExercises
+
+
+decodeExercises : Encode.Value -> Exercises
+decodeExercises =
+    Data.Exercise.Cache.decodeExercises
+        >> Result.toMaybe
+        >> Maybe.withDefault Exercise.empty
 
 
 handleLinkClicked : Model -> Browser.UrlRequest -> ( Model, Cmd Msg )
@@ -118,6 +145,17 @@ handleLinkClicked model urlRequest =
             ( model
             , Navigation.load href
             )
+
+
+getExercises : Cmd Msg
+getExercises =
+    Data.Exercise.Graphql.exercisesQuery
+        |> Graphql.Http.queryRequest "http://localhost:8080/v1alpha1/graphql"
+        |> Graphql.Http.send GotExercises
+
+
+
+-- Update Helpers
 
 
 updateHome : ( Home.Model, Cmd Home.Msg ) -> ( Model, Cmd Msg )
@@ -144,6 +182,11 @@ updateWith modelF msgF ( pageModel, pageCmd ) =
     ( modelF pageModel
     , Cmd.map msgF pageCmd
     )
+
+
+addCmd : Cmd Msg -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+addCmd cmd2 ( model, cmd1 ) =
+    ( model, Cmd.batch [ cmd1, cmd2 ] )
 
 
 
@@ -211,7 +254,7 @@ updateContext f model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Ports.receiveExercises AllExercises
+        [ Ports.receiveExercises GotCachedExercises
         , pageSubscriptions model
         ]
 
